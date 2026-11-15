@@ -2,8 +2,8 @@
 
 Claude acts as the project manager. It agrees a plan with you, waits for your sign-off, then
 delivers the work through T3 child agents: builders write the code, a reviewer from the other model
-family checks it, a verifier signs it off, and the PM runs the gates and merges. It never writes
-implementation code itself.
+family checks it, a verifier signs it off, a technical writer checks it against the plan's design,
+and the PM runs the gates and merges. It never writes implementation code itself.
 
 **Requirements.** T3 Code, with Codex available in T3. bstack dispatches every role through T3
 and stops if T3 is not there. The merge guard needs `jq`, `python3` or `node` to read its input,
@@ -44,9 +44,9 @@ every sprint.
 
 Where a machine can check a rule, a script does:
 - **Merge guard.** A Claude Code hook refuses `git merge … pm/<story>` unless the story records
-  passing gates, review and verifier at the branch head, the integration gate is not red, and it
-  merges one story at a time. Only you can switch it off, by starting Claude Code with
-  `BSTACK_NO_ENFORCE=1`.
+  passing gates, review, verifier and technical writer at the branch head, the integration gate
+  is not red, and it merges one story at a time. Only you can switch it off, by starting Claude
+  Code with `BSTACK_NO_ENFORCE=1`.
 - **`ledger.sh`.** One row per reviewed story's outcome, merged or not: its lineage, rounds,
   first-pass, reruns, wall time and model per role. It counts no tokens: tracking them would pull
   the PM's attention off the work.
@@ -91,12 +91,14 @@ Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <r
 
 1. **Plan.** The PM talks it through with you and writes `docs/plan.md`: scope, requirements and
    the low-level design (decisions, contracts, invariants, failure flows). When the project ends,
-   the PM cuts the plan down to that design and it stays as the platform's documentation. A
-   `docs/spec.md` holds the product intent when it needs its own file.
+   the PM cuts the plan down to that design and it stays as the platform's documentation: a
+   technical writer reads it without the code and lists what a rebuild would have to guess, and
+   the PM fills that in. A `docs/spec.md` holds the product intent when it needs its own file.
 2. **Sign-off, in conversation.** Nothing is built until you say "approved", recorded in `docs/approval.json`.
 3. **Stories.** Each sprint becomes self-contained files under `docs/stories/`, tracing to the plan's IDs.
 4. **Per-story loop on T3.** Claim, a design review when storage or data changes, tests first,
-   build in a T3 worktree, gate, review, at most three fix rounds, verify. Up to three independent
+   build in a T3 worktree, gate, review, at most three fix rounds, verify, then a check of the
+   diff against the design before the merge. Up to three independent
    stories build at once.
 5. **Ship.** A `--no-ff` merge whose body is the story's record, or a PR when you ask. Each sprint
    ends with the journey gate, a retro that proposes `AGENTS.md` learnings as a diff, and a demo.
@@ -117,6 +119,7 @@ the fallback and logs it.
 | design review | Reviews the plan of a storage, data-model, migration or versioning story before it is built | Codex `gpt-6-astra` high (`claude-opus-5-5` high) |
 | reviewer | Reviews the diff against the story; never the builder | The family that did not build: `gpt-6-astra` high or `claude-opus-5-5` high |
 | verifier | Checks each acceptance criterion, the sprint's journeys and the release candidate | `claude-opus-5-5` high (`gpt-6-astra` high) |
+| technical writer | Reads each story's diff against the plan's Design before the merge, and reads the shipped plan cold for what a rebuild would have to guess | `claude-sonnet-5-5` high (`claude-opus-5-5` high) |
 | researcher (optional) | Answers one external question, report under `docs/research/` | Codex `gpt-6.1-sol` high (`claude-opus-5-5` high) |
 | spec-architect (optional) | Writes the SpecDD `.sdd` files for a sprint | `claude-opus-5-5` high (`gpt-6-astra` high) |
 

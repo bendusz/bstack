@@ -1,5 +1,5 @@
 {
-  "description": "bstack merge guard: refuses a story merge (git merge pm/*) without gates and verifier recorded at the branch head, or while the integration gate is red. Only the user may switch it off, with BSTACK_NO_ENFORCE=1.",
+  "description": "bstack merge guard: refuses a story merge (git merge pm/*) without gates, review, verifier and technical writer recorded at the branch head, or while the integration gate is red. Only the user may switch it off, with BSTACK_NO_ENFORCE=1.",
   "hooks": {
     "PreToolUse": [
       {

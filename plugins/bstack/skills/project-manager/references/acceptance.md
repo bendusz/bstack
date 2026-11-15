@@ -48,3 +48,8 @@ Agents give these reasons for skipping the walk-through. None of them holds:
   Acceptance and the Risks that still hold, each true of what shipped. Delete Delivery, Stories,
   Traceability, Commands (`AGENTS.md` holds them), Waivers, Clarifications and Sign-off; the
   completion report and git keep them.
+- Then the cold read, which tests whether an agent given only the plan could rebuild the product.
+  Dispatch the technical writer (`roles.md`) with GOAL `Cold read`, `isolation: "shared"`, key
+  `cold-read-<k>`. Answer each `gap` from the code, or from the user where the code does not
+  decide it, write the answer into the Design and commit. Read again under the next `k` until a
+  read returns no gap, at most 3 reads; what is still open goes under Risks.

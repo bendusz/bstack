@@ -18,13 +18,14 @@ stands, and why things were decided. Everything else is branches, commits and tr
 The claim commit, on the integration branch and before any dispatch, appends to the story:
 ```
 ## Execution
-<!-- pm-exec: {"role_model":"<role provider/model effort>","thread":"<childThreadId>","branch":"pm/S<sprint>-<n>-<slug>","worktree":"<absolute path>","status":"<claimed|building|built|reviewing|fixing|verified|merged|blocked>","rounds":0,"gates":"PASS <sha>","review":"PASS <sha>","verifier":"<PASS|FAIL|UNKNOWN> <sha>|WAIVED"} -->
+<!-- pm-exec: {"role_model":"<role provider/model effort>","thread":"<childThreadId>","branch":"pm/S<sprint>-<n>-<slug>","worktree":"<absolute path>","status":"<claimed|building|built|reviewing|fixing|verified|merged|blocked>","rounds":0,"gates":"PASS <sha>","review":"PASS <sha>","verifier":"<PASS|FAIL|UNKNOWN> <sha>|WAIVED","writer":"PASS <sha>|WAIVED"} -->
 ```
 - `role_model` is the builder's model as dispatched, such as `builder claudeAgent/claude-opus-5-5
   high`; a fallback rewrites it. `thread`, `branch` and `worktree` come from the builder's
   dispatch and its BRANCH/WORKTREE line (`host.md` `## Dispatch`).
 - `gates` is absent until `loop.md` step 8 gates the up-to-date branch: `PASS <sha>` of that head.
-  `review` is the head every reviewer passed (`loop.md` step 5).
+  `review` is the head every reviewer passed (`loop.md` step 5), and `writer` the head the
+  technical writer passed (step 8).
 - Tests first (`loop.md` step 2) records its child in those three fields, still `claimed`. Once
   its tests are accepted, one line goes under the `pm-exec`: `Tests: <tests sha> <test paths>`.
 - `rounds` counts fix rounds. Increment and commit it before the round's dispatch; the cap is 3.

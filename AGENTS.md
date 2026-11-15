@@ -20,7 +20,8 @@ scripts and one hook.
 - `plugins/bstack/scripts/scan-secrets.sh`: blocks token formats in added lines; the project's
   pre-push hook and the PM's merge-time check.
 - `plugins/bstack/scripts/merge-guard.sh`, run by `hooks/hooks.json` on every Bash call: refuses
-  a story merge without recorded gates and verifier, or on a red integration gate.
+  a story merge without recorded gates, review, verifier and technical writer, or on a red
+  integration gate.
 - `plugins/bstack/scripts/ledger.sh` (a row per reviewed story) and `hygiene.sh`
   (`/bstack:doctor`'s machine checks).
 - `plugins/poteto/`: the ported pstack skills, with their LICENSE and attribution.

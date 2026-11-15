@@ -13,7 +13,7 @@ bad() { fails=$((fails + 1)); printf 'FAIL %s\n' "$1"; }
 
 # The model ids bstack may name. CI cannot ask T3, so this list is the pin: when a default
 # changes, check the new id against orchestrator_capabilities and update it here.
-models="claude-opus-5-5 claude-fable-5-2 gpt-6-astra gpt-6.1-sol"
+models="claude-opus-5-5 claude-sonnet-5-5 claude-fable-5-2 gpt-6-astra gpt-6.1-sol"
 
 # 1. plugin.json version equals the top CHANGELOG heading.
 ver=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$b/.claude-plugin/plugin.json" | head -1)
@@ -61,7 +61,8 @@ section() { awk -v h="## $1" '$0==h{f=1;next} /^## |^<!--/{f=0} f' "$refs/roles.
 hdr=$(awk '/^BRIEF /{f=1} f{print} /^PRIOR:/{exit}' "$refs/roles.md")
 common=$(section Common | wc -c | tr -d ' ')
 for pair in builder:2005:PRIOR reviewer:2035:PRIOR verifier:1744:PRIOR \
-            researcher:1055:'BASE|TOUCHES|PRIOR' spec-architect:1354:'PRIOR'; do
+            researcher:1055:'BASE|TOUCHES|PRIOR' spec-architect:1354:'PRIOR' \
+            technical-writer:1950:'TOUCHES|OUT OF SCOPE|PRIOR'; do
   role=${pair%%:*}; rest=${pair#*:}; max=${rest%%:*}; drop=${rest#*:}
   soul=$(section "$role" | wc -c | tr -d ' ')
   h=$(printf '%s\n' "$hdr" | grep -vE "^($drop)" | wc -c | tr -d ' ')
