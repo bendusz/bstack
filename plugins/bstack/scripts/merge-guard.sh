@@ -7,6 +7,8 @@
 #     commit after it (merges compared with their first parent) touches anything but PM records;
 #   - it records `review: PASS <sha>` on the branch, and every commit after it touches only PM
 #     records or is a clean merge (no change of its own) of a commit already on the target branch;
+#   - it records `writer: PASS <sha>`, the technical writer's check of the diff against the plan's
+#     Design, held to the review's rule (or exactly `WAIVED` with a technical writer row);
 #   - it is the only story in the call: stories integrate one at a time, each gated on the tip;
 #   - the target branch holds nothing outside PM records that the story branch has not merged;
 #   - docs/gate.txt, the integration gate, is not FAIL, unless pm-meta's tags hold fixes-gate.
@@ -146,20 +148,25 @@ for w in "${words[@]}"; do   # a HEAD-moving word anywhere in the call, whatever
   esac
 done
 
-review_covers() { # review_covers <sha>: as covers, but a clean merge of the base is allowed
-  local sha=$1 c p1 p2 t extra
+diff_covers() { # diff_covers <label> <sha> <remedy>: as covers, but a clean merge of the base is allowed
+  local sha=$2 c p1 p2 t extra
   [[ $sha =~ ^[0-9a-f]{40}([0-9a-f]{24})?$ ]] && [ "$(git -C "$g" cat-file -t "$sha" 2>/dev/null)" = commit ] \
-    || block "$id: the review record '$sha' is not a commit id in this repository"
+    || block "$id: the $1 record '$sha' is not a commit id in this repository"
   git -C "$g" merge-base --is-ancestor "$sha" "$head" 2>/dev/null \
-    || block "$id: the reviewed sha $sha is not on $br; review the head $head"
+    || block "$id: the $1 sha $sha is not on $br; $3 $head"
   for c in $(git -C "$g" rev-list --first-parent "$sha..$head"); do
     read -r _ p1 p2 _ <<< "$(git -C "$g" rev-list --parents -n 1 "$c")"
     if [ -n "${p2:-}" ] && git -C "$g" merge-base --is-ancestor "$p2" HEAD \
        && t=$(git -C "$g" merge-tree --write-tree "$p1" "$p2" 2>/dev/null | head -1) \
        && [ "$t" = "$(git -C "$g" rev-parse "$c^{tree}")" ]; then continue; fi
     extra=$(git -C "$g" diff-tree --no-commit-id --name-only -r "${p1:-$c}" "$c" | grep -vE "$RECORD_RE" | head -3 | oneline)
-    [ -z "$extra" ] || block "$id: reviewed at $sha, but a later commit on $br changes $extra; review the head $head"
+    [ -z "$extra" ] || block "$id: $1 passed at $sha, but a later commit on $br changes $extra; $3 $head"
   done
+}
+
+waived() { # waived <role word>: the plan's ## Waivers has a row for that role and this story
+  git -C "$g" show HEAD:docs/plan.md 2>/dev/null | awk '$0 == "## Waivers" { f = 1; next } /^## / { f = 0 } f' \
+    | grep '^|' | grep -i "$1" | grep -qE "(^|[^0-9A-Za-z-])$id([^0-9]|$)|all stories"
 }
 
 covers() { # covers <label> <sha>: a full commit id on the head, and nothing after it but PM records
@@ -181,7 +188,7 @@ check() { # check <repo dir> <story branch> <1 if an earlier command in the call
   git -C "$g" rev-parse --git-dir >/dev/null 2>&1 || block "$g is not a git repository; check the cd or -C path"
   bstack "$g" || return 0   # not a bstack project
   [ "$3" = 1 ] && block "a story merge after a command that moves HEAD; switch, then merge in a separate call"
-  local cur story file meta tags exec gates ver rev extra
+  local cur story file meta tags exec gates ver rev wri extra
   cur=$(git -C "$g" symbolic-ref --short -q HEAD)
   case $cur in pm/*) return 0 ;; esac   # bringing a story branch up to date is not a story merge
   case $br in "?"*) block "cannot read the merge operand '${br#?}'; write the branch name out" ;; esac
@@ -198,6 +205,7 @@ check() { # check <repo dir> <story branch> <1 if an earlier command in the call
   gates=$(printf '%s' "$exec" | sed -nE 's/.*"gates": *"([^"]*)".*/\1/p')
   ver=$(printf '%s' "$exec" | sed -nE 's/.*"verifier": *"([^"]*)".*/\1/p')
   rev=$(printf '%s' "$exec" | sed -nE 's/.*"review": *"([^"]*)".*/\1/p')
+  wri=$(printf '%s' "$exec" | sed -nE 's/.*"writer": *"([^"]*)".*/\1/p')
 
   case $gates in
     "PASS "*) covers gates "${gates#PASS }" ;;
@@ -205,14 +213,17 @@ check() { # check <repo dir> <story branch> <1 if an earlier command in the call
   esac
   case $ver in
     "PASS "*) covers verifier "${ver#PASS }" ;;
-    WAIVED) git -C "$g" show HEAD:docs/plan.md 2>/dev/null | awk '$0 == "## Waivers" { f = 1; next } /^## / { f = 0 } f' \
-        | grep '^|' | grep -i 'verifier' | grep -qE "(^|[^0-9A-Za-z-])$id([^0-9]|$)|all stories" \
-        || block "$id: verifier WAIVED, but docs/plan.md ## Waivers has no verifier row for $id" ;;
+    WAIVED) waived verifier || block "$id: verifier WAIVED, but docs/plan.md ## Waivers has no verifier row for $id" ;;
     *) block "$id: pm-exec has no 'verifier: PASS <sha>' (has '${ver:-nothing}')" ;;
   esac
   case $rev in
-    "PASS "*) review_covers "${rev#PASS }" ;;
+    "PASS "*) diff_covers review "${rev#PASS }" "review the head" ;;
     *) block "$id: pm-exec has no 'review: PASS <sha>' (has '${rev:-nothing}'); record the reviewed head" ;;
+  esac
+  case $wri in
+    "PASS "*) diff_covers writer "${wri#PASS }" "dispatch the technical writer on the head" ;;
+    WAIVED) waived writer || block "$id: writer WAIVED, but docs/plan.md ## Waivers has no technical writer row for $id" ;;
+    *) block "$id: pm-exec has no 'writer: PASS <sha>' (has '${wri:-nothing}'); dispatch the technical writer on the head (loop.md step 8)" ;;
   esac
   extra=$(git -C "$g" diff --name-only "$head...HEAD" | grep -vE "$RECORD_RE" | head -3 | oneline)
   [ -z "$extra" ] || block "$cur changed $extra since $br last merged it; merge $cur into $br, gate again"

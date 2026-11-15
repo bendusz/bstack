@@ -36,8 +36,26 @@ _Avoid_: source of truth, design doc
 
 **Design**:
 The part of the plan that fixes behaviour: decisions with the option each rejected, contracts,
-invariants and flows.
-_Avoid_: architecture
+invariants and flows. The `.sdd` files and the code follow it, never the reverse.
+_Avoid_: architecture, LLD
+
+**Contract line**:
+A `Must`, `Must not`, `Exposes` or `Done when` line of a `.sdd` file: the Design as one module
+holds it.
+_Avoid_: spec line
+
+**Gap**:
+Behaviour the code settles that the Design does not state.
+_Avoid_: drift, omission
+
+**Contradiction**:
+Code that does otherwise than a line of the Design or a contract line says.
+_Avoid_: drift, mismatch
+
+**Cold read**:
+A read of the shipped plan by an agent that opens no code, to list what a rebuild would have to
+guess.
+_Avoid_: doc review
 
 **Sprint boundary**:
 Everything between a sprint's last merge and the next sprint's first story: the journey gate, the

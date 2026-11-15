@@ -39,8 +39,11 @@ where you commit them. `clientRequestId` is `S<sprint>-spec-architect-<round>`. 
 - A story's Context names the `.sdd` files it implements instead of restating interfaces. Its
   `touches` are the paths those specs `Own`, and each criterion cites the `Done when` line it
   satisfies.
-- A builder may edit a `.sdd` inside its `touches` when the implementation forces it, and names
-  the path in `notes`. Tell the reviewer that a `.sdd` change the story does not name is `major`.
+- A `.sdd` contract line (`Must`, `Must not`, `Exposes`, `Done when`) encodes the Design. A
+  builder changes one only where its brief names the change, and returns `blocked` on one that
+  cannot hold (its soul says so); that is a change after sign-off (`planning.md`). It may edit
+  the other sections of a `.sdd` inside its `touches`. Tell the reviewer that a contract-line
+  change the story does not name is `major`.
 - The reviewer treats a `Must`, `Must not` or `Exposes` breach as `major`; the verifier fails a
   missed `Done when` line a covered criterion cites (`roles.md`).
 - The scaffold's SpecDD line in `AGENTS.md` tells every child to read `.specdd/bootstrap.md` first.

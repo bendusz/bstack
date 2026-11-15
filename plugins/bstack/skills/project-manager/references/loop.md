@@ -44,9 +44,11 @@ lacks STATUS, the head COMMIT or a CRITERIA line goes back first (`roles.md` `##
    `<id>-builder-<round>`, BRANCH `pm/<id>-<slug>`. Mark `building` with `thread` the new
    `childThreadId`, `branch` set and `worktree` empty, so no tests-stage coordinates survive.
    On `STATUS: done`, record its BRANCH/WORKTREE line and mark `built`; `blocked` or `partial`
-   goes to step 10 or a fix round. If the build is interrupted while `worktree` is empty,
-   `t3_thread_send` its `thread` asking for `git rev-parse --show-toplevel` and
-   `git branch --show-current`, record both, then tell it to continue (`host.md` `## Messaging`).
+   goes to step 10 or a fix round. A `blocked` that says the Design or a `.sdd` contract line is
+   wrong is yours to rule on, as a change after sign-off (`planning.md`). If the build is
+   interrupted while `worktree` is empty, `t3_thread_send` its `thread` asking for
+   `git rev-parse --show-toplevel` and `git branch --show-current`, record both, then tell it to
+   continue (`host.md` `## Messaging`).
 
 4. **Gate.** Run the gates yourself in the recorded worktree (`cd <worktree>`), never on a
    child's word: its CHECKS are a claim, your run is the evidence. If a gate cannot start
@@ -102,6 +104,17 @@ lacks STATUS, the head COMMIT or a CRITERIA line goes back first (`roles.md` `##
 8. **Ship.**
    - If `docs/gate.txt` says `FAIL` and the story is not tagged `fixes-gate`, stop: no merge
      (Floor 1). Take a story that fixes the gate, or escalate.
+   - Check the story against the Design. Dispatch the technical writer (`roles.md`),
+     `isolation: "shared"`, on the recorded worktree, key `<id>-writer-<round>`. GOAL names the
+     main checkout's `docs/plan.md`; DONE WHEN: every file in the diff read against its Design.
+     - `gap`: the build settled what the Design does not say, and you approve it. Write the
+       line into the Design, commit and log it. One that reaches scope or requirements is a
+       change after sign-off (`planning.md`).
+     - `contradiction`: the Design stands, and the code goes back as a Fix item (step 6). When
+       the Design is the one that is wrong, it is a change after sign-off.
+     - `STATUS: PASS` at the branch head, with every gap written in: record
+       `writer: PASS <sha>`. A plan `## Waivers` row for the technical writer records
+       `writer: WAIVED`.
    - Bring the branch up to date: `git -C <worktree> merge <integration>`. That tree is what the
      merge will produce: gate it and record `gates: PASS <head sha>`. If that merge brought in
      anything beyond the PM records (`state.md` `## PM records`), verify again (step 7).

@@ -13,6 +13,7 @@ a dispatch fails on it twice), use its fallback and log it. Record the model use
 | design review | `gpt-6-astra` high | `claude-opus-5-5` high | Reviewer soul, `focus: plan`, before a `Design review: yes` build. Rulings go into the story's Context. |
 | reviewer | the family that did not build: `gpt-6-astra` high after Claude, `claude-opus-5-5` high after Astra | none: wait or escalate | A builder on its fallback flips the reviewer. |
 | verifier | `claude-opus-5-5` high | `gpt-6-astra` high | Also the sprint journey gate and the release candidate. |
+| technical writer | `claude-sonnet-5-5` high | `claude-opus-5-5` high | Before every merge (`loop.md` step 8), and the cold read (`acceptance.md` `## 4`). |
 | spec-architect | `claude-opus-5-5` high | `gpt-6-astra` high | |
 | researcher | `gpt-6.1-sol` high | `claude-opus-5-5` high | |
 
@@ -56,6 +57,8 @@ OPEN: <risks, out-of-scope notes, what is not done>
 - First `git switch -c <BRANCH>` (from the tests sha when the brief gives one), then the
   `AGENTS.md` Setup command. Commit there; never push. Stay in TOUCHES; edit nothing PROTECTED.
   If an acceptance test is wrong, return `blocked`.
+- Change a `.sdd` `Must`, `Must not`, `Exposes` or `Done when` line only where the brief names the
+  change. One that cannot hold is `blocked`, with the line and the change you would make.
 - Decide what the story leaves open and say so in OPEN. Ask only when blocked; with no answer,
   return `blocked` with the question.
 - A bug fix ships with a regression test seen failing first. Reproduce before naming a cause.
@@ -84,6 +87,20 @@ OPEN: <risks, out-of-scope notes, what is not done>
   under `docs/evidence/<story-id>/`; else unknown. A journey runs from fresh state by its recipe,
   through the product's own interface, with no test helper or fixture.
 - STATUS: FAIL if any criterion, check or PRIOR finding fails; UNKNOWN if any lacks evidence; else PASS.
+
+## technical-writer
+- Read `git diff <BASE>...<BRANCH>` in WORKTREE against the `## Design` of the `docs/plan.md` GOAL
+  names and the `.sdd` files it links. Technical content only; report, never edit.
+- `gap`: the diff settles behaviour the Design leaves unsaid and a rebuild would need, such as a
+  bound, a default, an error, a state or a retry rule. Draft the line and name its Design part.
+- `contradiction`: the diff does otherwise than a Design or `.sdd` line says. Quote that line. The
+  Design stands until the PM changes it, so draft no line that matches the code.
+- Leave out names, layout and whatever a rebuild may do differently.
+- GOAL `Cold read` has no diff: open only `docs/plan.md` and the files it links, no code. Each
+  `gap` is a question a rebuild would have to guess: behaviour, a contract or the stack.
+- STATUS: PASS with no contradiction, else FAIL. Before OPEN, one line each:
+  `DESIGN: gap | <Design part> | <line to add, or the question>`
+  `DESIGN: contradiction | <the line> | <file:line> | <what the code does>`
 
 ## researcher
 - Answer GOAL in `docs/research/<date>-<slug>.md`: start from the repo's pinned versions, cite

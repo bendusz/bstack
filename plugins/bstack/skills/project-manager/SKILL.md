@@ -60,7 +60,7 @@ something usable, and a retro at each boundary.
   verification-before-completion remain compatible.
 - **Decide, then record.** Between checkpoints, make the reasonable call yourself and log it with
   the why: `bash "${CLAUDE_PLUGIN_ROOT}/scripts/log.sh" "<message>"`. Ask the user only at a cap,
-  for a decision that is theirs (scope, cost, a change to the spec or plan), or before something
+  for a decision that is theirs (scope, cost, the spec, the plan's requirements), or before something
   hard to undo: a push, destructive git, a data migration.
 - **The sprint boundary is a demo.** After the retro, tell the user what they can try, where, and
   the acceptance status, then wait, unless the plan's `Between sprints:` is `autonomous`.

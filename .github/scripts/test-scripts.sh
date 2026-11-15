@@ -141,9 +141,9 @@ hook() {
 hookraw() { # hookraw <cwd> <JSON-encoded command, escapes as given>
   printf '{"tool_name":"Bash","cwd":"%s","tool_input":{"command":"%s"}}' "$1" "$2" | bash "$guard"
 }
-exec_line() { # exec_line <gates> <verifier> [review, default the gates value]: rewrite S1-1's pm-exec, commit on main
+exec_line() { # exec_line <gates> <verifier> [review] [writer], both default the gates value: rewrite S1-1's pm-exec, commit on main
   git switch -q main
-  sed -i.bak "s|<!-- pm-exec:.*|<!-- pm-exec: {\"status\":\"verified\",\"rounds\":0,\"gates\":\"$1\",\"review\":\"${3:-$1}\",\"verifier\":\"$2\"} -->|" docs/stories/S1-1-a.md
+  sed -i.bak "s|<!-- pm-exec:.*|<!-- pm-exec: {\"status\":\"verified\",\"rounds\":0,\"gates\":\"$1\",\"review\":\"${3:-$1}\",\"verifier\":\"$2\",\"writer\":\"${4:-$1}\"} -->|" docs/stories/S1-1-a.md
   rm -f docs/stories/S1-1-a.md.bak; commit "state: $1 / $2"
 }
 cd "$work" && git init -q -b main mg && cd mg || exit 2
@@ -201,9 +201,13 @@ echo more-main > src/c.txt; commit "more code on main"
 git switch -q pm/S1-1-a; git merge -q --no-edit main; head4=$(git rev-parse HEAD); git switch -q main
 exec_line "PASS $head4" "PASS $head4" "PASS $head3"
 expect "guard: a clean merge of the base after the review passes" 0 "" hook "$mg" "$M"
+exec_line "PASS $head4" "PASS $head4" "PASS $head4" "PASS $head3"
+expect "guard: a clean merge of the base after the writer's check passes" 0 "" hook "$mg" "$M"
 git switch -q pm/S1-1-a; echo fix > src/d.txt; commit "builder fix after review"; head5=$(git rev-parse HEAD); git switch -q main
 exec_line "PASS $head5" "PASS $head5" "PASS $head3"
 expect "guard: a code commit after the reviewed sha blocks" 2 "review the head" hook "$mg" "$M"
+exec_line "PASS $head5" "PASS $head5" "PASS $head5" "PASS $head3"
+expect "guard: a code commit after the writer's sha blocks" 2 "dispatch the technical writer on the head" hook "$mg" "$M"
 git switch -q pm/S1-1-a; git reset -q --hard "$head4"; echo evil > src/e.txt
 git merge -q --no-ff --no-commit main 2>/dev/null; git add src/e.txt; git commit -q --no-edit -m "merge with a change of its own"
 head6=$(git rev-parse HEAD); git switch -q main
@@ -225,6 +229,15 @@ expect "guard: a waived verifier without a Waivers row blocks" 2 "no verifier ro
 sed -i.bak 's/^|---|---|---|---|---|$/&\n| verifier for S1-1 | docs only | 2026-01-01 | user | none yet |/' docs/plan.md
 rm -f docs/plan.md.bak; commit "waive"
 expect "guard: a waived verifier with a Waivers row passes" 0 "" hook "$mg" "$M"
+exec_line "PASS $head3" "PASS $head3" "PASS $head3" "none"
+expect "guard: no writer record blocks" 2 "no 'writer: PASS" hook "$mg" "$M"
+exec_line "PASS $head3" "PASS $head3" "PASS $head3" "PASS pm/S1-1-a"
+expect "guard: a ref name is not a writer sha" 2 "the writer record" hook "$mg" "$M"
+exec_line "PASS $head3" "PASS $head3" "PASS $head3" "WAIVED"
+expect "guard: a waived writer without a Waivers row blocks" 2 "no technical writer row" hook "$mg" "$M"
+sed -i.bak 's/^|---|---|---|---|---|$/&\n| technical writer for S1-1 | docs only | 2026-01-01 | user | none yet |/' docs/plan.md
+rm -f docs/plan.md.bak; commit "waive the writer"
+expect "guard: a waived writer with a Waivers row passes" 0 "" hook "$mg" "$M"
 side=$(git commit-tree "HEAD^{tree}" -m side)   # a commit in this repository, on no branch
 exec_line "PASS $side" "PASS $head3"
 expect "guard: a gates sha not on the branch blocks" 2 "not on pm/S1-1-a" hook "$mg" "$M"

@@ -3,6 +3,41 @@
 All notable changes to this project are documented here. Entries before 0.30.0 are in git
 (tag `v0.29.4`).
 
+## 1.4.0 - 2026-11-15
+
+Makes the plan's Design the documentation an agent could rebuild the product from. The Design
+decides what the `.sdd` files and the code are, a technical writer holds every merge to it, and
+the PM approves a change to it. Each rule here was kept only because the PM or the builder got
+its scenario wrong without it; the scenarios and results are in `docs/evals.md`.
+
+**The Design decides**
+- A builder changes a `.sdd` `Must`, `Must not`, `Exposes` or `Done when` line only where its
+  brief names the change, and returns `blocked` on one that cannot hold. Before, it could
+  rewrite one and report it afterwards.
+- A Design change after sign-off that keeps the scope and requirements (a decision, contract or
+  invariant) is the PM's to approve or refuse, with a second opinion from `/bstack:codex ask`
+  when it is consequential. Before, it waited for the user's re-approval; a change to scope or
+  requirements still does. A builder's `blocked` on the Design or a contract line goes to that
+  ruling, where it used to be escalated to the user.
+
+**Technical writer**
+- A new role, the technical writer (`claude-sonnet-5-5` high, fallback `claude-opus-5-5` high),
+  reads every story's diff against the Design before the merge. A gap, where the code settles
+  what the Design does not say, the PM approves, writes into the Design and logs. A
+  contradiction goes back to the builder as a Fix item. The story records `writer: PASS <sha>`.
+- After the plan is cut to documentation, the technical writer reads it cold, opening no code,
+  and lists what a rebuild would have to guess. The PM writes the answers into the Design, over
+  at most three reads.
+
+**Merge guard**
+- It refuses a story merge without `writer: PASS <sha>` on the branch, or `writer: WAIVED` with
+  a `## Waivers` row for the technical writer. A clean merge of the integration branch after the
+  writer's sha keeps the record, as it does for the review.
+
+**Upgrading**
+- From 1.3.0: a story in flight needs `writer: PASS <sha>` in its `pm-exec` before it merges.
+  Dispatch the technical writer on its head (`loop.md` step 8), or add a `## Waivers` row for it.
+
 ## 1.3.0 - 2026-11-14
 
 Removes the one script that branched by OS, and makes "files say only what is true now" a rule

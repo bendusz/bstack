@@ -32,8 +32,9 @@ plan, no spec and no sprints. Nothing is built before sign-off.
 ## 3. Write the plan
 - Create `docs/plan.md` from `<plugin>/templates/plan.md.template`, replacing its comments.
 - `## Design` is the low-level design: decisions with the option each rejected, contracts,
-  state and invariants, and flows that end in the main failure and its recovery. It is what
-  remains as the platform's documentation, so keep it true as the build goes.
+  state and invariants, and flows that end in the main failure and its recovery. The `.sdd`
+  files and the code follow it, never the reverse. It is what remains as the platform's
+  documentation, so the technical writer holds every merge to it (`loop.md` step 8).
 - Requirements carry stable IDs, `FR-n` and `AC-n`, and are never renumbered: the stories, the
   reviewer and the verifier trace to them.
 - Acceptance criteria use EARS where behavioural (`WHEN <condition or event>, THE SYSTEM SHALL
@@ -85,17 +86,24 @@ found wrong goes through this path, never drip-fed into a running story:
    stop and commit what it has on its branch. Log the trigger and why.
 2. **Classify,** and apply the change at the highest level it touches, then let it flow down:
    - Spec-level, product intent changed: update `docs/spec.md`, then re-derive the plan and stories.
-   - Plan-level, scope, design, stories or priorities: update the plan's Scope, Stories
-     table and Traceability, and every affected story file.
+   - Plan-level, scope, design, stories or priorities: update the plan's Scope, Design, Stories
+     table and Traceability, then every affected story file. With a skeleton, the story names
+     each `.sdd` contract line its builder is to change.
    - Story-level, a criteria tweak inside the agreed scope: update just the story file.
 
    Rewrite or delete in place. A dropped requirement goes, with its rows and any story never
    dispatched (`git rm`). The log line and the commit message say what changed and why; the
    files do not.
-3. **Re-approve if material.** Scope added or removed, a decision, contract or invariant
-   changed, or requirements altered is material; when unsure, treat it as material. Follow `state.md` `## Approval`: show
-   `git diff <plan_commit> -- docs/plan.md`, ask again, and write a new record only on a new
-   approval. A story-level tweak needs no re-approval; log it.
+3. **Approve at its level.**
+   - Scope added or removed, or requirements altered, is material and the user's. Follow
+     `state.md` `## Approval`: show `git diff <plan_commit> -- docs/plan.md`, ask again, and
+     write a new record only on a new approval. When unsure whether a change reaches scope or
+     requirements, treat it as material.
+   - A Design change inside the agreed scope and requirements (a decision, contract or
+     invariant) is yours to approve or refuse. Get a second opinion first with
+     `/bstack:codex ask` when it is consequential or you are unsure, then log the decision and
+     the why.
+   - A story-level tweak needs no approval; log it.
 4. **Replace, never restart.** Edit or delete a story never dispatched. A dispatched story keeps
    its `clientRequestId`s (`host.md` `## Dispatch`), so a rerun would return its old children.
    Instead set its `pm-exec` `status` to `blocked`, add a `Replaced by: <new id>` line, and keep
