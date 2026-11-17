@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. Entries before 0.30.0 are in git
 (tag `v0.29.4`).
 
+## 1.4.1 - 2026-11-16
+
+- The merge guard hook runs on Windows. `hooks.json` used Claude Code's exec form
+  (`"command": "bash"` with `args`), which looks `bash` up on PATH; on Windows that is usually
+  WSL's `bash.exe`, which cannot read the plugin's Windows path, so every Bash call ran
+  unchecked with a hook error. The hook is now in shell form, which Claude Code runs through Git
+  Bash. `check.sh` refuses an exec-form `hooks.json`.
+
 ## 1.4.0 - 2026-11-15
 
 Makes the plan's Design the documentation an agent could rebuild the product from. The Design

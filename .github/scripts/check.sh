@@ -98,6 +98,10 @@ if grep -q '"PreToolUse"' "$b/hooks/hooks.json" 2>/dev/null \
    && python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$b/hooks/hooks.json" 2>/dev/null; then
   ok "hooks/hooks.json runs merge-guard.sh on PreToolUse"
 else bad "hooks/hooks.json is missing, invalid, or does not run scripts/merge-guard.sh"; fi
+# Exec form (`args`) resolves `bash` on PATH, which on Windows is often WSL's bash.exe, not Git Bash.
+if grep -q '"args"' "$b/hooks/hooks.json"; then
+  bad "hooks/hooks.json uses exec form (args); write the shell form so Windows runs it through Git Bash"
+else ok "hooks/hooks.json uses the shell form"; fi
 for s in $scripts; do
   mode=$(git ls-files -s "$b/scripts/$s" | cut -d' ' -f1)
   [ "$mode" = 100755 ] || bad "$s is mode '$mode' in git, wanted 100755"
