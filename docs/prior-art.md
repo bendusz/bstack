@@ -31,3 +31,9 @@ The design of bstack was validated against the work below.
   https://github.com/cursor/plugins/tree/main/pstack
 - **deanpeters/Product-Manager-Skills.** PM discovery interview flows and INVEST stories.
   https://github.com/deanpeters/Product-Manager-Skills
+- **The Home Repo pattern** (AI Hero). One repository holds the steering files and points at the
+  others, and sessions start there. The basis for `/bstack:home`.
+  https://www.aihero.dev/the-home-repo-pattern
+- **LLM Wiki** (Andrej Karpathy). Untouched sources, pages the agent keeps, an index and a log,
+  with ingest, query and lint. The basis for the home repo's `wiki/`.
+  https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f

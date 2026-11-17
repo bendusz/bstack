@@ -44,6 +44,10 @@ done
 for h in '## Chair soul' '## Member soul'; do
   grep -qx "$h" "$b/skills/board/souls.md" 2>/dev/null || { miss=1; bad "souls.md lacks '$h'"; }
 done
+[ -f "$b/skills/home/soul.md" ] || { miss=1; bad "named but missing: skills/home/soul.md"; }
+for h in '## Overseer soul' '## Tools' '## Rules'; do
+  grep -qx "$h" "$b/skills/home/soul.md" 2>/dev/null || { miss=1; bad "home/soul.md lacks '$h'"; }
+done
 [ "$miss" -ne 0 ] || ok "every named reference, template and soul exists"
 
 # 3b. Token budgets. project-manager/SKILL.md loads every session; the phase references load only
@@ -72,7 +76,7 @@ for pair in builder:2005:PRIOR reviewer:2035:PRIOR verifier:1744:PRIOR \
 done
 
 # 4. ${CLAUDE_PLUGIN_ROOT} is substituted only in a SKILL.md body and hooks.json: references say <plugin>.
-if grep -rn 'CLAUDE_PLUGIN_ROOT' "$refs" "$b/templates" "$b/skills/board/souls.md"; then
+if grep -rn 'CLAUDE_PLUGIN_ROOT' "$refs" "$b/templates" "$b/skills/board/souls.md" "$b/skills/home/soul.md"; then
   bad "a reference or template uses \${CLAUDE_PLUGIN_ROOT}; write <plugin> there"
 else ok "no \${CLAUDE_PLUGIN_ROOT} outside a SKILL.md body"; fi
 for f in "$b"/skills/*/SKILL.md; do
@@ -98,6 +102,10 @@ if grep -q '"PreToolUse"' "$b/hooks/hooks.json" 2>/dev/null \
    && python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$b/hooks/hooks.json" 2>/dev/null; then
   ok "hooks/hooks.json runs merge-guard.sh on PreToolUse"
 else bad "hooks/hooks.json is missing, invalid, or does not run scripts/merge-guard.sh"; fi
+# Exec form (`args`) resolves `bash` on PATH, which on Windows is often WSL's bash.exe, not Git Bash.
+if grep -q '"args"' "$b/hooks/hooks.json"; then
+  bad "hooks/hooks.json uses exec form (args); write the shell form so Windows runs it through Git Bash"
+else ok "hooks/hooks.json uses the shell form"; fi
 for s in $scripts; do
   mode=$(git ls-files -s "$b/scripts/$s" | cut -d' ' -f1)
   [ "$mode" = 100755 ] || bad "$s is mode '$mode' in git, wanted 100755"

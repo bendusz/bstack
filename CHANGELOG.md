@@ -3,6 +3,45 @@
 All notable changes to this project are documented here. Entries before 0.30.0 are in git
 (tag `v0.29.4`).
 
+## 1.5.0 - 2026-11-17
+
+Adds the home repo: one folder over several product repositories, with an overseer above their
+PMs. Each rule here was kept only because its scenario went wrong without it; the scenarios and
+results are in `docs/evals.md`.
+
+**Home repo**
+- `/bstack:home` sets up a folder that holds several product repositories as a home repo and
+  acts as its overseer. It registers each nested repository as a T3 project, and writes an
+  `AGENTS.md` of pointers, a wiki index and a `.gitignore`. The home repo has no plan, approval
+  record or stories, so the merge guard does not act there.
+- The overseer sends a product's work to that product's PM thread, launched into its T3 project
+  and titled `PM <repo>`. It keeps the user's request word for word in `docs/requests/`.
+- The overseer signs off a plan that covers the request, and convenes the board first on a plan
+  of more than one sprint. A scope or date change, a waiver, a push, a secret, the release
+  walk-through and a go/no-go stay the user's.
+- A scheduled check reads each product's gate, stories and PM thread and acts on what changed.
+- `wiki/` holds what is true across the products, with ingest, query and lint.
+
+**The PM**
+- A message that starts `bstack overseer:` is the overseer's, not the user's. Its `approved`
+  is a sign-off, and the approval record gains `approved_by`. It cannot grant what is the
+  user's alone. `project-manager/SKILL.md` grows by one operating rule, inside its budget.
+- `host.md` lists the T3 tools the PM uses, to load in one call. Before, the skill named only
+  `orchestrator_capabilities`, and the PM loaded the rest one at a time or not at all.
+- Scheduled wake-ups are allowed. `host.md` no longer lists them among the ways not to wait for a
+  child, and a clock-timed release step may run on the PM's own `schedule_task` wake-up as well
+  as on a system timer or by a named person. The user still approves the timer, and it is still
+  recorded under the go/no-go's Timed steps.
+- The board's description allows a home repo's overseer to start it on a plan.
+
+## 1.4.1 - 2026-11-16
+
+- The merge guard hook runs on Windows. `hooks.json` used Claude Code's exec form
+  (`"command": "bash"` with `args`), which looks `bash` up on PATH; on Windows that is usually
+  WSL's `bash.exe`, which cannot read the plugin's Windows path, so every Bash call ran
+  unchecked with a hook error. The hook is now in shell form, which Claude Code runs through Git
+  Bash. `check.sh` refuses an exec-form `hooks.json`.
+
 ## 1.4.0 - 2026-11-15
 
 Makes the plan's Design the documentation an agent could rebuild the product from. The Design

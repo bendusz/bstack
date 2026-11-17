@@ -14,7 +14,9 @@ scripts and one hook.
 - `plugins/bstack/skills/project-manager/`: `SKILL.md` plus nine `references/` (planning, loop,
   roles, host, state, retro, skeleton, and acceptance and release, loaded only at their phase).
 - `plugins/bstack/skills/<name>/SKILL.md`: the entry-point skills pm, resume, doctor, retro, codex,
-  skeleton and board, invoked as `/bstack:<name>`. `board` keeps its chair and member souls in `skills/board/souls.md`, which the chair child reads.
+  skeleton, board and home, invoked as `/bstack:<name>`. `board` keeps its chair and member souls in `skills/board/souls.md`, which the chair child reads.
+  `home` sets up a home repo over several product repositories and acts as its overseer; the
+  overseer's soul, tools and rules are in `skills/home/soul.md`.
 - `plugins/bstack/templates/`: the artifacts the PM creates in a project.
 - `plugins/bstack/scripts/log.sh`: appends a timestamped line to a project's `docs/log.md`.
 - `plugins/bstack/scripts/scan-secrets.sh`: blocks token formats in added lines; the project's
@@ -42,7 +44,7 @@ scripts and one hook.
   at most 4,096, and each role's dispatch (`## Common` + soul + header) under the limit `check.sh`
   holds for it.
 - Every `references/*.md` and every template a skill or reference names exists, and so does
-  `skills/board/souls.md` with its two souls.
+  `skills/board/souls.md` with its two souls and `skills/home/soul.md` with its three sections.
 - Entry points are skills under `skills/<name>/SKILL.md`, each with `name` equal to its
   directory and a `description`. The plugin has no `commands` directory.
 - `${CLAUDE_PLUGIN_ROOT}` appears only in a `SKILL.md` body and `hooks/hooks.json`, where Claude

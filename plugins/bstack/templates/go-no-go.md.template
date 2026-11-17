@@ -9,11 +9,11 @@ Decision: <GO | NO-GO | moved to <date>, because <waived items>>
 | Release ships with the new behaviour switched off; switch-on is its own step | | | |
 | Rehearsal on the production service units, with production-like data | | | |
 | Rollback rehearsed, with its time measured | | | |
-| Every clock-timed step has a system timer or a named person | | | |
+| Every clock-timed step has an approved timer or a named person | | | |
 | Release tag is on the integration branch and on main (hygiene.sh) | | | |
 | <project item> | | | |
 
 ## Timed steps
-| when | step | runs by (timer unit or person) | check after |
-|------|------|--------------------------------|-------------|
-| <YYYY-MM-DD HH:MM> | <command> | <unit name or person> | <command -> expected> |
+| when | step | runs by (timer or person) | check after |
+|------|------|---------------------------|-------------|
+| <YYYY-MM-DD HH:MM> | <command> | <unit name, scheduled task or person> | <command -> expected> |

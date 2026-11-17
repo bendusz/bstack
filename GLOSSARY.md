@@ -66,3 +66,18 @@ _Avoid_: sprint close, sprint end
 The part of the sprint boundary that asks what the sprint taught: its three questions and the
 proposed `AGENTS.md` diff.
 _Avoid_: retro for the whole sprint boundary
+
+**Home repo**:
+A folder that holds several product repositories and delivers none of them. It keeps pointers to
+them, the wiki and the overseer's records.
+_Avoid_: workspace, monorepo
+
+**Overseer**:
+The agent that runs a home repo. It starts each product's PM, passes on the user's words, signs
+off a plan that covers them and keeps the wiki. It plans, builds and merges nothing.
+_Avoid_: lead, manager, orchestrator
+
+**Request**:
+The user's words for a piece of work, kept exactly as said in the home repo. A plan is signed
+off against it.
+_Avoid_: ticket, ask
