@@ -7,9 +7,11 @@ stands, and why things were decided. Everything else is branches, commits and tr
 - When planning starts, create `docs/approval.json` from
   `<plugin>/templates/approval.json.template` (`"status":"pending"`, the other
   fields `null`).
-- Sign-off is conversation style. Show the plan, and only after the user says approved, write
-  `{"status":"approved","approved_at":"<YYYY-MM-DD HH:MM>","plan_commit":"<sha>"}`, where
-  `plan_commit` is the commit holding the signed-off `docs/plan.md`. Commit it with a log line.
+- Sign-off is conversation style. Show the plan, and only after the user says approved, or a home
+  repo's overseer does (`planning.md` `## 4`), write
+  `{"status":"approved","approved_at":"<YYYY-MM-DD HH:MM>","plan_commit":"<sha>","approved_by":"<user|overseer>"}`,
+  where `plan_commit` is the commit holding the signed-off `docs/plan.md`. Commit it with a log
+  line.
 - Nothing is built while the record is not `approved`.
 - On a material plan change, stop: show `git diff <plan_commit> -- docs/plan.md`, ask again, and
   write a new record only on a new approval.

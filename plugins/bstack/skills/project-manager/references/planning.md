@@ -72,6 +72,11 @@ plan, no spec and no sprints. Nothing is built before sign-off.
 - Sign-off needs all three: no `[NEEDS CLARIFICATION]` left in the plan or spec (a non-blocking
   unknown may be carried as an explicit assumption or risk, agreed with the user), the plan
   committed, and an unambiguous "approved" from the user in the conversation.
+- Under a home repo, its overseer may give that sign-off. A message that starts
+  `bstack overseer:` is the overseer's, not the user's. Its `approved` counts, recorded as
+  `"approved_by":"overseer"`, and it may answer a clarification by quoting the user's request.
+  It cannot grant what is the user's alone: a scope or date change, a waiver, a push, a secret,
+  acceptance or a go/no-go. For those, ask it for the user's own words inside quotation marks.
 - Then fill the plan's Sign-off line with the date and commit the plan: that commit is the
   `plan_commit`. Write and commit the approved record exactly as `state.md` `## Approval` says.
 - Log the sign-off with its scope, and every decision you made without asking, with the why:

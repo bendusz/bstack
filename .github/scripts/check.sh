@@ -44,6 +44,10 @@ done
 for h in '## Chair soul' '## Member soul'; do
   grep -qx "$h" "$b/skills/board/souls.md" 2>/dev/null || { miss=1; bad "souls.md lacks '$h'"; }
 done
+[ -f "$b/skills/home/soul.md" ] || { miss=1; bad "named but missing: skills/home/soul.md"; }
+for h in '## Overseer soul' '## Tools' '## Rules'; do
+  grep -qx "$h" "$b/skills/home/soul.md" 2>/dev/null || { miss=1; bad "home/soul.md lacks '$h'"; }
+done
 [ "$miss" -ne 0 ] || ok "every named reference, template and soul exists"
 
 # 3b. Token budgets. project-manager/SKILL.md loads every session; the phase references load only
@@ -72,7 +76,7 @@ for pair in builder:2005:PRIOR reviewer:2035:PRIOR verifier:1744:PRIOR \
 done
 
 # 4. ${CLAUDE_PLUGIN_ROOT} is substituted only in a SKILL.md body and hooks.json: references say <plugin>.
-if grep -rn 'CLAUDE_PLUGIN_ROOT' "$refs" "$b/templates" "$b/skills/board/souls.md"; then
+if grep -rn 'CLAUDE_PLUGIN_ROOT' "$refs" "$b/templates" "$b/skills/board/souls.md" "$b/skills/home/soul.md"; then
   bad "a reference or template uses \${CLAUDE_PLUGIN_ROOT}; write <plugin> there"
 else ok "no \${CLAUDE_PLUGIN_ROOT} outside a SKILL.md body"; fi
 for f in "$b"/skills/*/SKILL.md; do

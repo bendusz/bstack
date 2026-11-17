@@ -28,9 +28,9 @@ at the release candidate's sha (`acceptance.md`).
   serves again. A rollback that was never run is an open item.
 
 ## Clock-timed steps
-- A step due at a clock time runs on a system timer (a systemd timer, launchd, `at`, cron, the
-  deploy system's scheduler) the user approves, or by a person the user names. Never on your own
-  wake-up (`ScheduleWakeup`, `schedule_task`, a sleep): it can fire late or not at all.
+- A step due at a clock time runs on a timer the user approves, or by a person the user names.
+  The timer is a system one (a systemd timer, launchd, `at`, cron, the deploy system's
+  scheduler) or your own scheduled wake-up (`schedule_task`).
 - Write the timer's definition, show it to the user, and record it under the go/no-go's Timed
   steps with the check to run after. Check and log the result the next time you run.
 

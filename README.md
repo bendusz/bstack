@@ -12,7 +12,9 @@ the design review and research. You may name other models for any dispatch. bsta
 (where it puts a worktree, what a child's result carries, how a reused request key answers).
 Dispatch, messaging and the model ids were last checked against T3 Code 0.1.9 nightly on
 2026-11-10; the worktree behaviour on 2026-11-07; a child dispatching its own children, which the
-board's chair relies on, on 2026-11-11.
+board's chair relies on, on 2026-11-11; a thread launched into a nested project reading the
+parent folder's `CLAUDE.md` but not the `AGENTS.md` it imports, which the home repo relies on, on
+2026-11-17.
 
 **Secrets stay on the machine.** A secret comes in through T3's `request_secret`, never a file.
 On the way out, the PM installs a git pre-push hook that scans every pushed commit, and scans
@@ -57,8 +59,7 @@ Where a machine can check a rule, a script does:
 Each sprint ends with the plan's user journeys run from a fresh state, then a demo: what you can
 try and where. Before a release, you walk the release candidate yourself and accept its
 differences by name; with a production release, go/no-go is binding, the new behaviour ships
-switched off, and a step due at a set time runs on a system timer or by a person, never on the
-PM's own wake-up.
+switched off, and a step due at a set time runs on a timer you approve or by a person you name.
 
 ## Install
 
@@ -94,7 +95,8 @@ Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <r
    the PM cuts the plan down to that design and it stays as the platform's documentation: a
    technical writer reads it without the code and lists what a rebuild would have to guess, and
    the PM fills that in. A `docs/spec.md` holds the product intent when it needs its own file.
-2. **Sign-off, in conversation.** Nothing is built until you say "approved", recorded in `docs/approval.json`.
+2. **Sign-off, in conversation.** Nothing is built until you say "approved", recorded in
+   `docs/approval.json`. Under a [home repo](#home-repo), its overseer may give that sign-off.
 3. **Stories.** Each sprint becomes self-contained files under `docs/stories/`, tracing to the plan's IDs.
 4. **Per-story loop on T3.** Claim, a design review when storage or data changes, tests first,
    build in a T3 worktree, gate, review, at most three fix rounds, verify, then a check of the
@@ -138,6 +140,7 @@ Each is a skill: run it as `/bstack:<name>`, or describe the task and Claude pic
 | `/bstack:codex` | `review` a commit, worktree, branch or codebase with Codex, or `ask` it a question. |
 | `/bstack:skeleton` | Write or extend the SpecDD skeleton for a sprint. |
 | `/bstack:board` | Convene the board: a 0-10 status score with recommendations, or `ask` it a question. |
+| `/bstack:home` | Set up a home repo over several product repositories and act as its overseer. |
 
 ## The board
 
@@ -157,9 +160,33 @@ convenes the meeting hands the chair a stamp, the baseline and the seats, and ge
 in about twenty lines. So a PM in the middle of a sprint spends almost none of its context on the
 meeting, and the brief and the tally come from an agent that did not run the project.
 
-The board is advisory and only you convene it: one meeting is six member runs and a chair. `quick`
+The board is advisory, and only you or a home repo's overseer convene it: one meeting is six
+member runs and a chair. `quick`
 holds the first round only, and `sponsor=<model>:<effort>` reseats a member or the chair. Minutes
 go to `docs/board/` in a project the PM manages, and to `tmp/board/` anywhere else.
+
+## Home repo
+
+`/bstack:home` turns a folder that holds several product repositories into a home repo, with
+Claude as its overseer. The home repo delivers nothing: it has no plan, approval record or
+stories. Each product keeps its own PM, in its own T3 project and thread, with its own gates and
+merge guard.
+
+- **Setup** registers each nested repository as a T3 project, asking first, and writes an
+  `AGENTS.md` with one pointer per repository, a wiki index and a `.gitignore` for the nested
+  repositories. A thread started in a nested repository works from its own project's
+  instructions: Claude reads the lines of the home `CLAUDE.md` but not the `AGENTS.md` it imports,
+  and Codex reads neither. So the home `CLAUDE.md` stays that one import line.
+- **Requests.** Tell the overseer what a product needs. It keeps your words in `docs/requests/`,
+  starts or messages that product's PM, and signs off the PM's plan when it covers what you
+  asked. Before it approves a plan of more than one sprint it convenes the board. Scope and date
+  changes, waivers, pushes, secrets, the release walk-through and go/no-go stay yours: it passes
+  the PM's question to you as the PM wrote it.
+- **Check-ups.** A scheduled check, every 20 minutes unless you choose otherwise, reads each
+  product's gate, stories and PM thread, and acts on what changed.
+- **Wiki.** `wiki/` holds what is true across the products: contracts between them, shared
+  standards, the glossary and lessons that apply to more than one. Tell the overseer something
+  to remember, ask it a question, or run `/bstack:home lint`.
 
 ## State and the decision log
 

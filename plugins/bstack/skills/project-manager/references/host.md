@@ -7,6 +7,14 @@ At session start, call `orchestrator_capabilities` once; it lists the providers,
 options you may target. If it is missing or fails, say "bstack requires T3 Code" and stop.
 Call it again only after a dispatch error or a provider change the user names.
 
+## Tools
+T3's tools load by name: one `ToolSearch select:` call, with the `mcp__t3-code__` prefix on each.
+- Children: `orchestrator_capabilities`, `delegate_task`, `task_status` (a finished child's
+  result), `task_cancel` (stop a child you no longer need)
+- Threads: `t3_thread_send`, `t3_thread_read`, `t3_pending_request`
+- The user and the clock: `request_secret`, `schedule_task`
+- PR mode: `link_pull_request`, `watch_pull_request`, `unwatch_pull_request`
+
 ## Dispatch
 - Every role goes through `delegate_task`: model and effort are explicit, and each child has a
   thread you can message. `task` is built as `roles.md` `## The brief` says; `title` is
@@ -34,7 +42,7 @@ Call it again only after a dispatch error or a provider change the user names.
 - The native Explore agent is for quick read-only lookups only, never for a role. Children may
   start their own subagents inside their brief and report them; do not manage those.
 - Wait without polling: the default `async` mode wakes you when a child completes. No `task_status`
-  loops, sleeps, watchers or scheduled wake-ups. Follow the `next` a result gives.
+  loops, sleeps or watchers. Follow the `next` a result gives.
 - A T3 restart or a user Stop cancels running children; resume per `state.md` `## Resume`.
 
 ## Messaging

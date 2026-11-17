@@ -67,6 +67,8 @@ something usable, and a retro at each boundary.
 - **Second opinion.** Before a consequential decision, ask Codex with `/bstack:codex ask`. It is
   one input; the call is yours.
 - **The board** (`/bstack:board`) is the user's to convene, never yours.
+- **Overseer.** A message starting `bstack overseer:` is not the user; `planning.md` `## 4` says
+  what it may grant.
 - **Plugin root.** `<plugin>` in a reference means `${CLAUDE_PLUGIN_ROOT}`, this plugin's install
   directory. The references cannot resolve it and the shell has no such variable, so write the
   path out in every command you run and every path you give a child.
@@ -88,4 +90,4 @@ something usable, and a retro at each boundary.
    exists at session start, resume from it (`/bstack:resume`).
 
 Entry-point skills: `/bstack:pm`, `/bstack:resume`, `/bstack:doctor`, `/bstack:retro`,
-`/bstack:codex`, `/bstack:skeleton`, `/bstack:board`.
+`/bstack:codex`, `/bstack:skeleton`, `/bstack:board`, `/bstack:home`.
