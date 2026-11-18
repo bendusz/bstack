@@ -274,7 +274,7 @@ cd "$work/repo" || exit 2
 
 # --- ledger.sh (in the merge-guard repository, where S1-1 has a pm-exec) ---
 cd "$mg" || exit 2
-W="builder=claude-opus-5-5:14m reviewer=gpt-6-astra:6m"
+W="builder=claude-opus-5-5:14m reviewer=gpt-6.2-astra:6m"
 printf '# S1-3: a again\nReplaces: S1-1\n<!-- pm-exec: {"status":"merged","rounds":2} -->\n' > docs/stories/S1-3-a.md
 printf '# S1-4: a, third try\nReplaces: S1-3\n<!-- pm-exec: {"status":"merged","rounds":1} -->\n' > docs/stories/S1-4-a.md
 expect "ledger: appends a row" 0 "" bash "$ledger" S1-1 merged 0 0 1 "$W" "12->30"

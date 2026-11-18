@@ -27,7 +27,7 @@ Arguments: $ARGUMENTS
   - `codebase`: the whole tracked tree, no diff.
 - **Objectives**: every remaining word or quoted phrase, such as `security`, `performance`,
   `design` or `"error handling in the parser"`. None means one general review.
-- **Model**: Codex `gpt-6-astra`, `reasoningEffort: high`, the reviewer default for Claude's work.
+- **Model**: Codex `gpt-6.2-astra`, `reasoningEffort: xhigh`, the reviewer default for Claude's work.
   Use another only when the user names one (`model=<id>`, `effort=<level>`) and
   `orchestrator_capabilities` lists it. A Codex target always sets `reasoningEffort`.
 
@@ -39,7 +39,7 @@ message so they run in parallel:
   `design`, `security` or `performance`, else `Objective: <text>`. When the review targets a
   story, add its story file (with its acceptance criteria) and its recorded `pm-exec.worktree`,
   and run the diff there. With no story, add: "No story: CRITERIA is n/a."
-- `target`: `{"providerInstanceId":"codex","model":"gpt-6-astra","options":{"reasoningEffort":"high"}}`.
+- `target`: `{"providerInstanceId":"codex","model":"gpt-6.2-astra","options":{"reasoningEffort":"xhigh"}}`.
 - `isolation: "shared"`, so the child sees the checkout as it is, uncommitted changes included.
 - `title`: `codex review <scope> <objective>`.
 - `clientRequestId`: `codex-review-<stamp>`, fresh per call; with several objectives, append
@@ -51,7 +51,7 @@ effort, scope, objective and `childThreadId`. `tmp/` is scratch and must be giti
 `.gitignore` does not ignore it, show the one-line addition and ask before appending it.
 
 Relay each verdict and the most severe findings across the reports, attributed ("Codex
-(gpt-6-astra) found …"), with the report paths. On a story, triage them as `references/loop.md`
+(gpt-6.2-astra) found …"), with the report paths. On a story, triage them as `references/loop.md`
 step 6 does before anything goes to a builder.
 
 ## ask
@@ -65,9 +65,9 @@ step 6 does before anything goes to a builder.
 - `task`: `references/roles.md` `## Common` with `<role>` as `researcher`, the `## researcher`
   soul, then the brief.
 - Dispatch one `delegate_task` on the researcher's default, `target`
-  `{"providerInstanceId":"codex","model":"gpt-6.1-sol","options":{"reasoningEffort":"high"}}`
+  `{"providerInstanceId":"codex","model":"gpt-6.2-sol","options":{"reasoningEffort":"high"}}`
   (another model only when the user names one), `isolation: "shared"`, `title` `codex ask`,
   `clientRequestId` `codex-ask-<YYYYMMDDHHMMSS>`, fresh per call.
-- Relay the answer attributed to the model, "Codex (gpt-6.1-sol) recommends …", then your own
+- Relay the answer attributed to the model, "Codex (gpt-6.2-sol) recommends …", then your own
   take: where you agree, where you differ, and why. The decision stays yours; when it settles one,
   log it with `bash "${CLAUDE_PLUGIN_ROOT}/scripts/log.sh" "<message>"`.

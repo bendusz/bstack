@@ -12,9 +12,9 @@ path out in every command.
 
 # The board
 
-Three stakeholders meet about this project: a sponsor, an engineering lead and a customer. Each is
-a T3 child on its own model. They either score the project's status from 0 to 10 and recommend
-what to do, or assess a question the user puts to them. A fourth child chairs: it runs the gates,
+Four stakeholders meet about this project: a sponsor, an engineering lead, a customer and an
+operations lead. Each is a T3 child on its own model. They either score the project's status from 0 to 10 and recommend
+what to do, or assess a question the user puts to them. A fifth child chairs: it runs the gates,
 writes the brief, relays, tallies and writes the minutes, with no vote and no opinion.
 
 You convene the meeting and receive the verdict. Nothing else of it enters your context, and
@@ -30,7 +30,7 @@ Arguments: $ARGUMENTS
   word after the options is neither, everything after the options is the question. `ask` with no
   question: ask the user for it.
 - `<seat>=<model>` changes a seat's model, `<seat>=<model>:<effort>` its effort too, and
-  `<seat>=:<effort>` only the effort: `engineering=gpt-6.1-sol:high`, `sponsor=:max`,
+  `<seat>=:<effort>` only the effort: `engineering=gpt-6.2-sol:high`, `sponsor=:max`,
   `chair=:high`.
 - `quick` holds round 1 only and lowers each member's default effort one step. Call the result an
   independent panel, not a discussion.
@@ -39,20 +39,21 @@ Arguments: $ARGUMENTS
 | Seat | Stake | Default target |
 |---|---|---|
 | sponsor | Accountable for the outcome: does the work still serve the goal, is the scope right, are the risks being retired, is it worth what it costs | `{"providerInstanceId":"claudeAgent","model":"claude-opus-5-5","options":{"effort":"high"}}` |
-| engineering | Owns what was built: correctness, tests, security, debt, and whether the next change will be cheap or dear | `{"providerInstanceId":"codex","model":"gpt-6-astra","options":{"reasoningEffort":"xhigh"}}` |
+| engineering | Owns what was built: correctness, tests, security, debt, and whether the next change will be cheap or dear | `{"providerInstanceId":"codex","model":"gpt-6.2-astra","options":{"reasoningEffort":"xhigh"}}` |
 | customer | The person who uses what ships: does it do what they need, would they get through the first run, the docs and the errors | `{"providerInstanceId":"claudeAgent","model":"claude-fable-5-2","options":{"effort":"medium"}}` |
+| operations | Runs it once it ships: release and rollback, configuration and secrets, what it depends on, how a failure shows and is recovered, and whether the handoff says enough | `{"providerInstanceId":"codex","model":"gpt-6.2-sol","options":{"reasoningEffort":"xhigh"}}` |
 | chair | None, and no vote | `{"providerInstanceId":"claudeAgent","model":"claude-opus-5-5","options":{"effort":"medium"}}` |
 
 A seat is a place to look from, not a fence: every member judges the whole project. An override
 changes the model, never the stake. `quick` efforts: sponsor `medium`, engineering `high`,
-customer `low`; an effort the user names stands as given.
+customer `low`, operations `high`; an effort the user names stands as given.
 
 ## Convene
 1. **Host.** Probe as `references/host.md` `## Probe` says; without T3 Code, say "bstack requires
-   T3 Code" and stop. All four models and efforts must be in `orchestrator_capabilities`, on the
+   T3 Code" and stop. All five models and efforts must be in `orchestrator_capabilities`, on the
    provider that lists the model (`effort` for Claude, `reasoningEffort` for Codex). If one is
-   not, name it and stop before dispatching anyone: the user names a replacement or agrees to a
-   two-seat meeting. Never substitute a model yourself.
+   not, name it and stop before dispatching anyone: the user names a replacement or agrees to meet
+   without that seat. Never substitute a model yourself.
 2. **Baseline.** Take one stamp, `YYYYMMDD-HHMMSS`: it is the meeting's id in every key and
    path, reused only to retry this meeting. If a minutes file with that stamp exists in
    `docs/board/` or `tmp/board/`, take a new one. Record the absolute repository root, the
@@ -80,6 +81,7 @@ customer `low`; an effort the user names stands as given.
      - sponsor: <target JSON>
      - engineering: <target JSON>
      - customer: <target JSON>
+     - operations: <target JSON>
      ```
      Leave out a seat the user agreed to do without. Add nothing else: no summary of the
      project, no view of its health, no hint of what you expect.
