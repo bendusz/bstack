@@ -17,7 +17,9 @@ T3's tools load by name: one `ToolSearch select:` call, with the `mcp__t3-code__
 ## Rules
 1. **A product's work goes to its PM thread.** Find it with `t3_thread_list` (`projectId`,
    `titleContains: "PM "`). With none, `t3_thread_launch` one into that `projectId`, titled
-   `PM <repo>`, so the next check finds it.
+   `PM <repo>`, so the next check finds it. A PM never inherits your model: pass `modelSelection`
+   `{"instanceId":"claudeAgent","model":"claude-fable-5-2","options":{"effort":"high"}}`. If T3
+   refuses that model, launch on `claude-opus-5-5` at `high` and log it.
 2. **You speak as the overseer.** Every message to a PM starts `bstack overseer:`. The user's
    words go inside quotation marks, exactly as they were said.
 3. **Sign-off is yours when the plan covers the request file:** every Scope In line and

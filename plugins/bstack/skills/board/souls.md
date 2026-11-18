@@ -26,6 +26,8 @@ Write one file, the minutes. Edit and commit nothing else. Never open or copy a 
     change will be cheap or dear.
   - customer: the person who uses what ships: does it do what they need, would they get
     through the first run, the docs and the errors.
+  - operations: runs it once it ships: release and rollback, configuration and secrets, what it
+    depends on, how a failure shows and is recovered, and whether the handoff says enough.
 - **Brief.** Every seat gets the same text apart from its seat and stake. It holds the
   repository root, the baseline, the mode, the goal and the milestone, the question verbatim in
   `ask` mode, the gate results, and the evidence list:
@@ -61,11 +63,11 @@ Write one file, the minutes. Edit and commit nothing else. Never open or copy a 
   that fails, hold the meeting without it. In round 2, its round-1 statement stands, marked
   `no rebuttal`. Never fill a seat with another model, and never score in its place.
 - **Tally.**
-  - Score: the median of three final scores, shown with every seat's round-1 and final score,
-    and `split` when the highest and lowest differ by 3 or more. With fewer than three (a seat
+  - Score: the median of the final scores, shown with every seat's round-1 and final score, and
+    `split` when the highest and lowest differ by 3 or more. With fewer than three (a seat
     absent or `Score: unknown`), list what you have, give no board score, and name the evidence
     an `unknown` seat asked for. Disagreement is reported, never averaged away or settled by you.
-  - Position, `ask` mode: the one two or three seats hold, each seat's own, and what would
+  - Position, `ask` mode: the one more than half the seats hold, each seat's own, and what would
     change each mind.
   - Recommendations: merge those that say the same thing, keeping the clearest wording. Rank
     by how many seats back it, then by urgency. Keep at most 5. One seat's recommendation goes
@@ -78,12 +80,12 @@ Write one file, the minutes. Edit and commit nothing else. Never open or copy a 
   - Baseline: <branch> @ <sha>, <clean | dirty>
   - Goal: <goal> · Milestone: <milestone>
   - Question: <ask mode only, verbatim>
-  - Seats: sponsor <model> <effort> · engineering <model> <effort> · customer <model> <effort>
+  - Seats: sponsor <model> <effort> · engineering <model> <effort> · customer <model> <effort> · operations <model> <effort>
   - Threads: <each member's childThreadId>
   - Gates: test <result> · lint <result> · build <result>
 
   ## Verdict
-  Board: <n>/10 (sponsor <r1>→<final>, engineering <r1>→<final>, customer <r1>→<final>) <split>
+  Board: <n>/10 (sponsor <r1>→<final>, engineering <r1>→<final>, customer <r1>→<final>, operations <r1>→<final>) <split>
   <two sentences at most: what the seats agree on, and the main point they do not>
 
   ## Recommendations
@@ -105,7 +107,7 @@ Write one file, the minutes. Edit and commit nothing else. Never open or copy a 
   moved baseline, files the gates changed, or `none`; `Minutes: <path>`; and
   `Log: board <mode> <n>/10 (<finals>): <top recommendation>`, or the position in `ask` mode.
   The text after `Log: ` is one line of at most 100 characters, which `log.sh` enforces:
-  `board status 7/10 (7,8,7): cap the chair's log line`. Shorten the recommendation to fit;
+  `board status 7/10 (7,8,7,6): cap the chair's log line`. Shorten the recommendation to fit;
   never drop the score.
 
 ## Member soul

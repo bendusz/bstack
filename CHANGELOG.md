@@ -3,6 +3,38 @@
 All notable changes to this project are documented here. Entries before 0.30.0 are in git
 (tag `v0.29.4`).
 
+## 1.6.0 - 2026-11-18
+
+Moves the Codex roles to `gpt-6.2-astra` and `gpt-6.2-sol`, seats a fourth board member and
+gives a PM that an overseer launches a model of its own. Both new ids are in
+`orchestrator_capabilities` on the `codex` provider.
+
+**Models**
+- `gpt-6.2-astra` replaces `gpt-6-astra` and `gpt-6.2-sol` replaces `gpt-6.1-sol` everywhere,
+  and `check.sh` pins the new ids.
+- The reviewer and the design review run at xhigh. Both were high.
+- The verifier's fallback is `gpt-6.2-sol` xhigh, where it was Astra at high. The technical
+  writer's fallback, `claude-opus-5-5`, drops from high to medium.
+- `/bstack:codex review` follows the reviewer to `gpt-6.2-astra` xhigh, and `ask` follows the
+  researcher to `gpt-6.2-sol` high.
+
+**The board**
+- A fourth member, **operations**, on `gpt-6.2-sol` xhigh (`quick`: high). It judges from the
+  seat of whoever runs the project once it ships: release and rollback, configuration and
+  secrets, dependencies, how a failure shows and is recovered, and the handoff. The members are
+  now two Claude and two Codex models, and a meeting is eight member runs and a chair.
+- The tally no longer says "three": the score is the median of the final scores, and an `ask`
+  position needs more than half the seats. Two further lines were tried and not added, because
+  the chair got both right without them: four scores of 8, 6, 7 and 5 came out as 6.5 with
+  `split`, and two seats against two came out as no majority with each seat's position.
+- With one model missing, the user agrees to meet without that seat, where the text said a
+  two-seat meeting.
+
+**Home repo**
+- The overseer launches a PM thread on `claude-fable-5-2` high, and on `claude-opus-5-5` high
+  if T3 refuses that. Before, no file named a model for the thread, and in the scenario the
+  overseer copied its own session's model and effort (`docs/evals.md` S34).
+
 ## 1.5.0 - 2026-11-17
 
 Adds the home repo: one folder over several product repositories, with an overseer above their

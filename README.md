@@ -117,15 +117,16 @@ the fallback and logs it.
 
 | Role | Does | Default (fallback) |
 |---|---|---|
-| builder | Implements one story, a tests-only brief or a fix, in its own worktree | `claude-opus-5-5` high (Codex `gpt-6-astra` high) |
-| design review | Reviews the plan of a storage, data-model, migration or versioning story before it is built | Codex `gpt-6-astra` high (`claude-opus-5-5` high) |
-| reviewer | Reviews the diff against the story; never the builder | The family that did not build: `gpt-6-astra` high or `claude-opus-5-5` high |
-| verifier | Checks each acceptance criterion, the sprint's journeys and the release candidate | `claude-opus-5-5` high (`gpt-6-astra` high) |
-| technical writer | Reads each story's diff against the plan's Design before the merge, and reads the shipped plan cold for what a rebuild would have to guess | `claude-sonnet-5-5` high (`claude-opus-5-5` high) |
-| researcher (optional) | Answers one external question, report under `docs/research/` | Codex `gpt-6.1-sol` high (`claude-opus-5-5` high) |
-| spec-architect (optional) | Writes the SpecDD `.sdd` files for a sprint | `claude-opus-5-5` high (`gpt-6-astra` high) |
+| builder | Implements one story, a tests-only brief or a fix, in its own worktree | `claude-opus-5-5` high (Codex `gpt-6.2-astra` high) |
+| design review | Reviews the plan of a storage, data-model, migration or versioning story before it is built | Codex `gpt-6.2-astra` xhigh (`claude-opus-5-5` high) |
+| reviewer | Reviews the diff against the story; never the builder | The family that did not build: Codex `gpt-6.2-astra` xhigh after a Claude build, `claude-opus-5-5` high after an Astra build |
+| verifier | Checks each acceptance criterion, the sprint's journeys and the release candidate | `claude-opus-5-5` high (Codex `gpt-6.2-sol` xhigh) |
+| technical writer | Reads each story's diff against the plan's Design before the merge, and reads the shipped plan cold for what a rebuild would have to guess | `claude-sonnet-5-5` high (`claude-opus-5-5` medium) |
+| researcher (optional) | Answers one external question, report under `docs/research/` | Codex `gpt-6.2-sol` high (`claude-opus-5-5` high) |
+| spec-architect (optional) | Writes the SpecDD `.sdd` files for a sprint | `claude-opus-5-5` high (Codex `gpt-6.2-astra` high) |
 
-The PM runs on whatever model you choose; the plan records it as `PM model:`.
+The PM runs on whatever model you choose; the plan records it as `PM model:`. A home repo's
+overseer starts each PM on `claude-fable-5-2` high (`claude-opus-5-5` high).
 
 ## Skills
 
@@ -144,23 +145,24 @@ Each is a skill: run it as `/bstack:<name>`, or describe the task and Claude pic
 
 ## The board
 
-`/bstack:board` seats three stakeholders, each a T3 child on its own model: a **sponsor**
-(`claude-opus-5-5`, high), an **engineering** lead (Codex `gpt-6-astra`, xhigh) and a **customer**
-(`claude-fable-5-2`, medium). With no arguments they score how well placed the project is to reach
+`/bstack:board` seats four stakeholders, each a T3 child on its own model: a **sponsor**
+(`claude-opus-5-5`, high), an **engineering** lead (Codex `gpt-6.2-astra`, xhigh), a **customer**
+(`claude-fable-5-2`, medium) and an **operations** lead (Codex `gpt-6.2-sol`, xhigh), who runs
+what ships. With no arguments they score how well placed the project is to reach
 its next milestone, from 0 to 10, and recommend what to do; `/bstack:board ask <question>` puts a
 question to them instead.
 
 They write their first statements without seeing each other's. In a second round each reads the
-other two, with the scores removed, and holds or changes its own. The board's score is the median,
-shown with all three, and dissent stays on the record.
+other three, with the scores removed, and holds or changes its own. The board's score is the median,
+shown with all four, and dissent stays on the record.
 
-A fourth child chairs (`claude-opus-5-5`, medium). It runs the gates once for everyone, writes the
+A fifth child chairs (`claude-opus-5-5`, medium). It runs the gates once for everyone, writes the
 brief, holds both rounds, tallies and writes the minutes, and it has no vote. The session that
 convenes the meeting hands the chair a stamp, the baseline and the seats, and gets back the verdict
 in about twenty lines. So a PM in the middle of a sprint spends almost none of its context on the
 meeting, and the brief and the tally come from an agent that did not run the project.
 
-The board is advisory, and only you or a home repo's overseer convene it: one meeting is six
+The board is advisory, and only you or a home repo's overseer convene it: one meeting is eight
 member runs and a chair. `quick`
 holds the first round only, and `sponsor=<model>:<effort>` reseats a member or the chair. Minutes
 go to `docs/board/` in a project the PM manages, and to `tmp/board/` anywhere else.

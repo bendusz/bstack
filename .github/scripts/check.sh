@@ -13,7 +13,7 @@ bad() { fails=$((fails + 1)); printf 'FAIL %s\n' "$1"; }
 
 # The model ids bstack may name. CI cannot ask T3, so this list is the pin: when a default
 # changes, check the new id against orchestrator_capabilities and update it here.
-models="claude-opus-5-5 claude-sonnet-5-5 claude-fable-5-2 gpt-6-astra gpt-6.1-sol"
+models="claude-opus-5-5 claude-sonnet-5-5 claude-fable-5-2 gpt-6.2-astra gpt-6.2-sol"
 
 # 1. plugin.json version equals the top CHANGELOG heading.
 ver=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$b/.claude-plugin/plugin.json" | head -1)
