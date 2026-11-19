@@ -10,8 +10,9 @@ plan, no spec and no sprints. Nothing is built before sign-off.
 - Brownfield work: run one native Explore pass for the architecture, the conventions, the real
   test, lint and build commands, and where new code should go. Fold the answers into the plan's
   Design and Commands, and keep them for the stories' Context.
-- Dispatch a researcher (`roles.md` `## researcher`, via `host.md` `## Dispatch`) only when an
-  external unknown decides the plan: a library choice, an unfamiliar SDK. Add `/bstack:codex ask`
+- Dispatch a researcher (`roles.md` `## researcher`, via `host.md` `## Dispatch`) when an
+  external unknown decides the plan: a library choice, an unfamiliar SDK. `## 3` sends one for
+  every plan of more than one story, whether or not you see an unknown. Add `/bstack:codex ask`
   for a consequential or contested call. Cite the
   `docs/research/` report in the plan's decision.
 
@@ -35,6 +36,15 @@ plan, no spec and no sprints. Nothing is built before sign-off.
   state and invariants, and flows that end in the main failure and its recovery. The `.sdd`
   files and the code follow it, never the reverse. It is what remains as the platform's
   documentation, so the technical writer holds every merge to it (`loop.md` step 8).
+- **Look before you build.** A plan of more than one story gets one researcher dispatch before
+  you present it, key `plan-libraries-<k>`. You cannot ask about a library you do not know
+  exists, so the question is the whole Design: GOAL `For each part the Design of docs/plan.md
+  builds itself, name the maintained libraries or services that already provide it, with
+  licence, upkeep and fit, and recommend use or build.` Each part the Design builds itself
+  gets a Decisions row citing the report: what you chose, and each candidate and why it lost or
+  that the report found none. Building
+  what a maintained library provides needs a reason that row states, and "more control" is not
+  one.
 - Requirements carry stable IDs, `FR-n` and `AC-n`, and are never renumbered: the stories, the
   reviewer and the verifier trace to them.
 - Acceptance criteria use EARS where behavioural (`WHEN <condition or event>, THE SYSTEM SHALL
@@ -72,11 +82,23 @@ plan, no spec and no sprints. Nothing is built before sign-off.
 - Sign-off needs all three: no `[NEEDS CLARIFICATION]` left in the plan or spec (a non-blocking
   unknown may be carried as an explicit assumption or risk, agreed with the user), the plan
   committed, and an unambiguous "approved" from the user in the conversation.
-- Under a home repo, its overseer may give that sign-off. A message that starts
-  `bstack overseer:` is the overseer's, not the user's. Its `approved` counts, recorded as
-  `"approved_by":"overseer"`, and it may answer a clarification by quoting the user's request.
-  It cannot grant what is the user's alone: a scope or date change, a waiver, a push, a secret,
-  acceptance or a go/no-go. For those, ask it for the user's own words inside quotation marks.
+- Under a home repo, its overseer answers for the user wherever the answer is not the user's
+  alone. A message that starts `bstack overseer:` is the overseer's, not the user's. You are
+  under one when your request came in such a message, the record says `approved_by: overseer`,
+  or it has told you the user put this product under a home repo.
+  Then your questions, `PLAN READY <plan commit>` and each sprint boundary go to it: say them
+  in your thread, where its next check reads them, and carry on with what does not depend on the
+  answer. What it sends:
+  - `approved <plan commit>` is the sign-off, recorded as `"approved_by":"overseer"`.
+  - `decided: <answer>` answers a question or a clarification, quoted from the user's request or
+    decided by the overseer. Record it in Clarifications as the overseer's, or in the log after
+    sign-off, and go on. Never ask the user to confirm it.
+  - `sprint <n> accepted` stands for the user's look at the demo. End each sprint boundary with
+    the handoff committed and the line `SPRINT <n> DONE <commit>`, then any `AGENTS.md` diff the
+    retro proposes; the acceptance covers that diff unless it says otherwise.
+  It cannot grant what is the user's alone: a scope or date change, a change of direction, a
+  waiver, a push, a secret, money, acceptance, a go/no-go or anything that cannot be undone. For those, ask it for the
+  user's own words inside quotation marks.
 - Then fill the plan's Sign-off line with the date and commit the plan: that commit is the
   `plan_commit`. Write and commit the approved record exactly as `state.md` `## Approval` says.
 - Log the sign-off with its scope, and every decision you made without asking, with the why:
@@ -107,7 +129,9 @@ found wrong goes through this path, never drip-fed into a running story:
    - A Design change inside the agreed scope and requirements (a decision, contract or
      invariant) is yours to approve or refuse. Get a second opinion first with
      `/bstack:codex ask` when it is consequential or you are unsure, then log the decision and
-     the why.
+     the why. One that replaces what a
+     merged story built is a change of direction: the user's, as scope is, and until they
+     answer you carry on with the plan as signed off.
    - A story-level tweak needs no approval; log it.
 4. **Replace, never restart.** Edit or delete a story never dispatched. A dispatched story keeps
    its `clientRequestId`s (`host.md` `## Dispatch`), so a rerun would return its old children.

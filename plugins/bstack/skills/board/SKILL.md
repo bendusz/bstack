@@ -1,6 +1,6 @@
 ---
 name: board
-description: Use when the user invokes /bstack:board or asks for a board meeting, a stakeholder review, a 0-10 score of the project's status, or several models' joint judgement on a question about the project. Invoked by the user, or by a home repo's overseer on a plan; advisory and costly under T3 Code, so never start it on your own.
+description: Use when the user invokes /bstack:board or asks for a board meeting, a stakeholder review, a 0-10 score of the project's status, or several models' joint judgement on a question about the project. Invoked by the user, or by a home repo's overseer on a plan or on its review cadence; advisory and costly under T3 Code, so never start it on your own.
 argument-hint: "[quick] [<seat>=<model>[:<effort>] …] [status | ask <question>]"
 ---
 

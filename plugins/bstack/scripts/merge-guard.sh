@@ -21,7 +21,7 @@
 # Only the user switches it off, by starting Claude Code with BSTACK_NO_ENFORCE=1.
 set -uo pipefail
 # PM records, as references/state.md lists them: never a story's code.
-RECORD_RE='^docs/(stories/|evidence/|retros/|(log|ledger|plan|handoff|go-no-go|acceptance-differences)\.md$|(approval|acceptance)\.json$|gate\.txt$)'
+RECORD_RE='^docs/(stories/|evidence/|retros/|board/|(log|ledger|plan|handoff|go-no-go|acceptance-differences)\.md$|(approval|acceptance)\.json$|gate\.txt$)'
 SEP=$'\x1f'
 
 block() { printf 'bstack merge guard: %s\n' "$1" >&2; exit 2; }
