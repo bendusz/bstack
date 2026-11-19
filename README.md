@@ -201,7 +201,8 @@ you are not watching keeps moving.
   board recommendation that changes the scope, the architecture or the plan, or any change that
   replaces what merged stories built, whoever proposes it. Each waits for you in the PM's or the
   chair's words, and the PM carries on with the plan as signed off. A PM's own escalation
-  names a default and a time: if you have not answered by then, that default applies.
+  names a default and a time. If you have not answered by then, that default applies, and it
+  leaves the scope and the date as signed off: changing either takes your own words.
 - **The board.** While a product builds, the overseer convenes a status meeting 4 hours after
   sign-off and every 8 hours after that, and only when a story has merged since the last one.
   Setup asks for other hours, or never. The PM holds merges while the board reads the tree, for

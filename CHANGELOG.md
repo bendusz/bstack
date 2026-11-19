@@ -67,6 +67,11 @@ its scenario went wrong without it (`docs/evals.md` S35 to S55).
 - Two lines were tried and not added. Without them the PM already held merges for a board
   meeting, lifted the hold on the verdict, adopted the recommendation inside the plan and sent
   the change of direction to the user.
+- A limit on the PM's timed default was tried and not added: under an overseer, a decision that
+  is the user's alone would default to nothing changing. Without it, in two runs, a PM blocked
+  between dropping a requirement and moving the date already named a default that kept both as
+  signed off. With nothing else to build, it started the rewrite that keeps the requirement as
+  a new story, to cancel if the user drops the requirement.
 - A review asked for eight more lines, and each was tried and not added because the scenario
   passed without it. The PM already sent a researcher before swapping a library for its own
   code, stopped at `SPRINT <n> DONE` when the plan said `Between sprints: autonomous`, and
