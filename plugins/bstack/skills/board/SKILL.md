@@ -6,7 +6,7 @@ argument-hint: "[quick] [<seat>=<model>[:<effort>] …] [status | ask <question>
 
 If you were dispatched as a child agent (your task begins 'You are a bstack … child'), do not use this skill.
 
-`references/…` below means `${CLAUDE_PLUGIN_ROOT}/skills/project-manager/references/…`, and
+`references/…` below means `${CLAUDE_PLUGIN_ROOT}/skills/pm/references/…`, and
 `<plugin>` in any reference means `${CLAUDE_PLUGIN_ROOT}`. Neither is a shell variable: write the
 path out in every command.
 
@@ -68,7 +68,7 @@ customer `low`, operations `high`; an effort the user names stands as given.
    - `task`: these lines, then the meeting block. The chair reads its soul itself, so the souls
      never enter your context; do not read `souls.md`.
      ```
-     You are a bstack board chair child, not the PM and not a member. Do not invoke the project-manager skill or any other bstack skill.
+     You are a bstack board chair child, not the PM and not a member. Do not invoke the PM skill or any other bstack skill.
      Read ${CLAUDE_PLUGIN_ROOT}/skills/board/souls.md now, in full. Its "Chair soul" is your instructions; its "Member soul" is what you paste to each seat. Then hold this meeting. If you cannot read that file, return `Board: failed, cannot read souls.md` and stop.
 
      Meeting

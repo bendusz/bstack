@@ -88,7 +88,9 @@ plugin), then run the two steps above. Projects keep working; see the 1.0.0 and 
 
 ## Use
 
-Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <request>`.
+Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <request>`. On a
+project that is already signed off, `/bstack:pm` picks it up where it stands. To prepare a
+repository before anything is planned, run `/bstack:setup-project`.
 
 1. **Plan.** The PM talks it through with you and writes `docs/plan.md`: scope, requirements and
    the low-level design (decisions, contracts, invariants, failure flows). When the project ends,
@@ -132,18 +134,21 @@ overseer starts each PM on `claude-fable-5-2` high (`claude-opus-5-5` high).
 
 ## Skills
 
-Each is a skill: run it as `/bstack:<name>`, or describe the task and Claude picks it up.
+Each is a skill: run it as `/bstack:<name>`, or describe the task and Claude picks it up. A role
+skill makes the session that role. A setup skill prepares a folder and takes on no role.
 
 | Skill | What it does |
 |---|---|
-| `/bstack:pm` | Act as the PM end to end: plan, sign-off, stories, loop, ship. |
+| `/bstack:pm` | Role: the PM. Plans a request end to end, or picks a signed-off project up where it stands. |
+| `/bstack:overseer` | Role: the overseer of a home repo. Checks the products, passes on requests, starts new products and keeps the wiki. |
+| `/bstack:setup-project` | Setup: registers a repository with T3 and adds `AGENTS.md`, the `CLAUDE.md` bridge and the secret scan, before any plan. |
+| `/bstack:setup-home` | Setup: turns a folder that holds several product repositories into a home repo. |
 | `/bstack:resume` | Pick up from git, the approval record, the story Execution blocks and the log. |
 | `/bstack:doctor` | Check the T3 host, the toolchain, the project's gates, Codex, `log.sh`, the secret scan, the merge guard and project hygiene. In a home repo, check that the overseer's scheduled check is running and each product is visible to it. |
 | `/bstack:retro` | Run the sprint boundary's cross-story review and retrospective. |
 | `/bstack:codex` | `review` a commit, worktree, branch or codebase with Codex, or `ask` it a question. |
 | `/bstack:skeleton` | Write or extend the SpecDD skeleton for a sprint. |
 | `/bstack:board` | Convene the board: a 0-10 status score with recommendations, or `ask` it a question. |
-| `/bstack:home` | Set up a home repo over several product repositories and act as its overseer. |
 
 ## The board
 
@@ -171,8 +176,8 @@ go to `docs/board/` in a project the PM manages, and to `tmp/board/` anywhere el
 
 ## Home repo
 
-`/bstack:home` turns a folder that holds several product repositories into a home repo, with
-Claude as its overseer. The home repo delivers nothing: it has no plan, approval record or
+`/bstack:setup-home` turns a folder that holds several product repositories into a home repo,
+and `/bstack:overseer` makes Claude its overseer. The home repo delivers nothing: it has no plan, approval record or
 stories. Each product keeps its own PM, in its own T3 project and thread, with its own gates and
 merge guard. The overseer answers for you wherever the answer is not yours alone, so a product
 you are not watching keeps moving.
@@ -210,7 +215,7 @@ you are not watching keeps moving.
   overseer may tell the PM to adopt a recommendation that stays inside the plan.
 - **Check-ups.** A scheduled check, every 20 minutes unless you choose otherwise, reads each
   product's gate, stories and PM thread, and acts on what changed. It keeps `docs/watch.md`:
-  what needs you, what was decided for you and one line per product. `/bstack:home seen`
+  what needs you, what was decided for you and one line per product. `/bstack:overseer seen`
   clears the decided list once you have read it. Its first line is the time of the last check.
 - **What it costs.** Each check is a fresh session that reads every product: 72 a day at 20
   minutes, whether or not anything changed. A board meeting is nine runs, eight member runs and
@@ -220,7 +225,7 @@ you are not watching keeps moving.
   project. Nothing else tells you that the checks have stopped.
 - **Wiki.** `wiki/` holds what is true across the products: contracts between them, shared
   standards, the glossary and lessons that apply to more than one. Tell the overseer something
-  to remember, ask it a question, or run `/bstack:home lint`.
+  to remember, ask it a question, or run `/bstack:overseer lint`.
 
 ## State and the decision log
 

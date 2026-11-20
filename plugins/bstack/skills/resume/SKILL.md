@@ -5,11 +5,11 @@ description: Resume a PM-managed project from git, the approval record, the stor
 
 If you were dispatched as a child agent (your task begins 'You are a bstack … child'), do not use this skill.
 
-`references/…` below means `${CLAUDE_PLUGIN_ROOT}/skills/project-manager/references/…`, and
+`references/…` below means `${CLAUDE_PLUGIN_ROOT}/skills/pm/references/…`, and
 `<plugin>` in any reference means `${CLAUDE_PLUGIN_ROOT}`. Neither is a shell variable: write the
 path out in every command.
 
-Run the `bstack:project-manager` skill's procedure (load that skill first) to resume this project.
+Run the `bstack:pm` skill's procedure (load that skill first) to resume this project.
 Probe the host first; without T3 Code, say so and stop. Then load `references/state.md` and follow
 `## Resume`: read `docs/handoff.md` if present, then the approval record, the integration branch's first-parent history, every
 story's `pm-exec`, the worktree list, each recorded thread that is not merged, and the last ~20

@@ -72,8 +72,11 @@ sprint (`planning.md` `## 4`).
 ## Resume
 Read, in order: `docs/handoff.md` if present, then skip what its SKIP line lists; `docs/approval.json`; `git log --first-parent <integration branch>`; every
 story's `pm-exec`; `git worktree list --porcelain`; `t3_thread_read` of each thread a non-merged
-block records; the last ~20 lines of `docs/log.md`. Not approved means planning; approved with no
-stories means decomposition. Then re-enter each story from its `status` (steps per `loop.md`):
+block records; the last ~20 lines of `docs/log.md`. A message that came with the resume (a hold, an
+acceptance, a stop, a new requirement) is taken next, before any story is re-entered. Not approved
+means planning; approved with no stories means the scaffold for whatever is absent
+(`scaffold.md`), then decomposition. Then re-enter each story from its `status` (steps per
+`loop.md`):
 - `claimed`, no `thread`: dispatch step 2 or 3. Its fixed key returns the child of a lost response.
 - `claimed`, a `thread`, no `Tests:` line: the tests child. Finished: check its last result
   (step 2). Cancelled or interrupted: `t3_thread_send` it to continue, as step 3 resumes a build.

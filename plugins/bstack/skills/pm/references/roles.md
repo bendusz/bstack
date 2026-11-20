@@ -8,7 +8,7 @@ a dispatch fails on it twice), use its fallback and log it. Record the model use
 
 | role | default | fallback | rule |
 |---|---|---|---|
-| PM | the plan's `PM model:`, the user's choice | none | No child takes it. An overseer starts one on the model `skills/home/soul.md` rule 1 names. |
+| PM | the plan's `PM model:`, the user's choice | none | No child takes it. An overseer starts one on the model `skills/overseer/SKILL.md` rule 1 names. |
 | builder: builds, fixes, tests only | `claude-opus-5-5` high | `gpt-6.2-astra` high | One default, whatever the story's size. |
 | design review | `gpt-6.2-astra` xhigh | `claude-opus-5-5` high | Reviewer soul, `focus: plan`, before a `Design review: yes` build. Rulings go into the story's Context. |
 | reviewer | the family that did not build: `gpt-6.2-astra` xhigh after Claude, `claude-opus-5-5` high after Astra | none: wait or escalate | A builder on its fallback flips the reviewer. |

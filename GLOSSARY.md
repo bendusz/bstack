@@ -67,6 +67,19 @@ The part of the sprint boundary that asks what the sprint taught: its three ques
 proposed `AGENTS.md` diff.
 _Avoid_: retro for the whole sprint boundary
 
+**Soul**:
+Who an agent is and the rules it holds. A role skill keeps it in its body; a child gets its own
+in the brief.
+_Avoid_: persona, personality, system prompt
+
+**Role skill**:
+A skill that makes the session a role and holds that role's soul: `pm`, `overseer`.
+_Avoid_: persona skill, agent
+
+**Setup skill**:
+A skill that prepares a folder and takes on no role: `setup-project`, `setup-home`.
+_Avoid_: init, bootstrap
+
 **Home repo**:
 A folder that holds several product repositories and delivers none of them. It keeps pointers to
 them, the wiki and the overseer's records.

@@ -11,12 +11,14 @@ scripts and one hook.
 - Run: install the marketplace into Claude Code under T3 Code.
 
 ## Layout
-- `plugins/bstack/skills/project-manager/`: `SKILL.md` plus nine `references/` (planning, loop,
-  roles, host, state, retro, skeleton, and acceptance and release, loaded only at their phase).
-- `plugins/bstack/skills/<name>/SKILL.md`: the entry-point skills pm, resume, doctor, retro, codex,
-  skeleton, board and home, invoked as `/bstack:<name>`. `board` keeps its chair and member souls in `skills/board/souls.md`, which the chair child reads.
-  `home` sets up a home repo over several product repositories and acts as its overseer; the
-  overseer's soul, tools and rules are in `skills/home/soul.md`.
+- `plugins/bstack/skills/<name>/SKILL.md`: every skill, invoked as `/bstack:<name>`.
+  - Role skills make the session a role and hold its soul in their body. `pm` is the project
+    manager, with ten `references/` (planning, scaffold, loop, roles, host, state, retro,
+    skeleton, and acceptance and release, loaded only at their phase). `overseer` runs a home
+    repo over several product repositories.
+  - Setup skills prepare a folder and take on no role: `setup-project` and `setup-home`.
+  - The other entry points are resume, doctor, retro, codex, skeleton and board. `board` keeps
+    its chair and member souls in `skills/board/souls.md`, which the chair child reads.
 - `plugins/bstack/templates/`: the artifacts the PM creates in a project.
 - `plugins/bstack/scripts/log.sh`: appends a timestamped line to a project's `docs/log.md`.
 - `plugins/bstack/scripts/scan-secrets.sh`: blocks token formats in added lines; the project's
@@ -40,13 +42,15 @@ scripts and one hook.
 - `plugin.json` version equals the top CHANGELOG heading.
 - Every bstack `SKILL.md` stays under 16,000 characters, leaving headroom under Claude Code's
   20,000-character re-attachment cut after compaction.
-- Token budgets: `project-manager/SKILL.md` at most 6,257 bytes, `acceptance.md` and `release.md`
+- Token budgets: `pm/SKILL.md` at most 6,490 bytes, `acceptance.md` and `release.md`
   at most 4,096, and each role's dispatch (`## Common` + soul + header) under the limit `check.sh`
   holds for it.
 - Every `references/*.md` and every template a skill or reference names exists, and so does
-  `skills/board/souls.md` with its two souls and `skills/home/soul.md` with its three sections.
+  `skills/board/souls.md` with its two souls. `skills/overseer/SKILL.md` has its soul, tools and
+  rules sections.
 - Entry points are skills under `skills/<name>/SKILL.md`, each with `name` equal to its
-  directory and a `description`. The plugin has no `commands` directory.
+  directory, a `description`, and the child guard as the first line of its body. The plugin has
+  no `commands` directory.
 - `${CLAUDE_PLUGIN_ROOT}` appears only in a `SKILL.md` body and `hooks/hooks.json`, where Claude
   Code substitutes it. References and templates write `<plugin>`, which every skill defines.
 - Every model id in the plugin and the README is in `check.sh`'s pinned list: full ids such as
