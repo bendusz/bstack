@@ -105,7 +105,7 @@ T3's tools load by name: one `ToolSearch select:` call, with the `mcp__t3-code__
 ## What was asked
 Arguments: $ARGUMENTS
 
-- Any argument but `check`: first `list_scheduled_tasks`. A task whose prompt is
+- Unless the argument is `check`: first `list_scheduled_tasks`. A task whose prompt is
   `/bstack:home check` runs a skill that is gone, so no product is checked by it. Say so and ask.
   On a yes, `schedule_task` with its `scheduledTaskId` and `prompt` `/bstack:overseer check`,
   nothing else: its interval, thread, fresh session and pause stay. Read it back and say when it

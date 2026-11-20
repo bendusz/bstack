@@ -69,7 +69,7 @@ _Avoid_: retro for the whole sprint boundary
 
 **Soul**:
 Who an agent is and the rules it holds. A role skill keeps it in its body; a child gets its own
-in the brief.
+in its brief, or reads it from the file the brief names.
 _Avoid_: persona, personality, system prompt
 
 **Role skill**:

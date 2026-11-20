@@ -36,8 +36,9 @@ the one message step 6 gives.
    - For each chosen repository whose `docs/approval.json` says `approved`, a product in flight:
      `docs/requests/<repo>-adopted.md`, with a first line `Request for <repo>` and then
      `The request is the Scope and Requirements of its docs/plan.md at <plan_commit>.` Then tell
-     its PM. Ask the user which thread that is when none is titled `PM <repo>`, and rename it so
-     with `t3_thread_update`. Send
+     its PM: the newest thread in its project titled exactly `PM <repo>` (`t3_thread_list`,
+     `projectId`, `titleContains: "PM <repo>"`). Ask the user which thread that is when none is
+     so titled, and rename it so with `t3_thread_update`. Send
      `bstack overseer: the user has put this product under a home repo. From now on your questions, PLAN READY and each sprint boundary come to me.`
    The home repo gets no `docs/approval.json`, `docs/plan.md` or stories: those belong to a
    product, and the merge guard acts only where an approval record is.

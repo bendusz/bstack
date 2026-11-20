@@ -41,15 +41,17 @@ Each of these did the right thing without the line written for it (`docs/evals.m
 - A resume takes a hold that arrived with it before re-entering a story.
 - A project approved with no stories is scaffolded before it is decomposed.
 - A PM loaded by `/bstack:doctor` on a project mid-sprint runs the readiness check only.
-- `/bstack:overseer` outside a home repo names `/bstack:setup-home` and sets nothing up.
+- `/bstack:overseer` outside a home repo names `/bstack:setup-home` and sets nothing up, for
+  `check` and for `new` alike.
+- `/bstack:pm` in a subdirectory of a home repo finds the home repo at the git root.
 - `/bstack:overseer` with no argument shows what needs you and what was decided for you, and
   runs no check.
 
 **Upgrade**
 - `/bstack:home setup` is now `/bstack:setup-home`. Every other `/bstack:home <x>` is
   `/bstack:overseer <x>`.
-- In each home repo, run `/bstack:overseer` with any request and say yes when it asks about the
-  scheduled check. It changes the task's prompt and keeps its interval, thread and pause. Until
+- In each home repo, run `/bstack:overseer` and say yes when it asks about the scheduled
+  check. It changes the task's prompt and keeps its interval, thread and pause. Until
   then the task runs a skill that no longer exists and no product is checked. `/bstack:doctor`
   says so.
 - Projects need nothing.
