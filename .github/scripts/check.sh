@@ -57,8 +57,8 @@ done
 #     at their phase; a child's dispatch (## Common + its soul + the header skeleton) stays under
 #     its limit below. Raise a number only on purpose, with a CHANGELOG line saying why.
 pmsk=$(wc -c < "$b/skills/pm/SKILL.md" | tr -d ' ')
-if [ "$pmsk" -le 6490 ]; then ok "pm/SKILL.md is $pmsk bytes (budget 6490)"
-else bad "pm/SKILL.md is $pmsk bytes, over its 6490 budget"; fi
+if [ "$pmsk" -le 6430 ]; then ok "pm/SKILL.md is $pmsk bytes (budget 6430)"
+else bad "pm/SKILL.md is $pmsk bytes, over its 6430 budget"; fi
 for r in acceptance release; do
   c=$(wc -c < "$refs/$r.md" 2>/dev/null | tr -d ' ')
   if [ -n "$c" ] && [ "$c" -le 4096 ]; then ok "$r.md is $c bytes (budget 4096)"

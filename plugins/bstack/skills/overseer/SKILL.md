@@ -105,16 +105,12 @@ T3's tools load by name: one `ToolSearch select:` call, with the `mcp__t3-code__
 ## What was asked
 Arguments: $ARGUMENTS
 
-- A folder whose `AGENTS.md` has no `## Repos` is not a home repo. Say so, name
-  `/bstack:setup-home` and stop: you set nothing up.
 - Any argument but `check`: first `list_scheduled_tasks`. A task whose prompt is
   `/bstack:home check` runs a skill that is gone, so no product is checked by it. Say so and ask.
   On a yes, `schedule_task` with its `scheduledTaskId` and `prompt` `/bstack:overseer check`,
   nothing else: its interval, thread, fresh session and pause stay. Read it back and say when it
   next runs, or that it is paused. If a task with the new prompt is there already, ask instead
   whether to delete the old one. Then go on with what was asked.
-- No argument: show `Needs you` and `Decided for you` from `docs/watch.md`, or say no check is
-  recorded yet. Run no check, and take what the user says next.
 - `check`: `## Check`.
 - `seen`: the user has read `Decided for you`. Empty it in `docs/watch.md` and commit.
 - `lint`, or anything for the wiki: `## Wiki`.

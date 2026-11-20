@@ -42,7 +42,7 @@ scripts and one hook.
 - `plugin.json` version equals the top CHANGELOG heading.
 - Every bstack `SKILL.md` stays under 16,000 characters, leaving headroom under Claude Code's
   20,000-character re-attachment cut after compaction.
-- Token budgets: `pm/SKILL.md` at most 6,490 bytes, `acceptance.md` and `release.md`
+- Token budgets: `pm/SKILL.md` at most 6,430 bytes, `acceptance.md` and `release.md`
   at most 4,096, and each role's dispatch (`## Common` + soul + header) under the limit `check.sh`
   holds for it.
 - Every `references/*.md` and every template a skill or reference names exists, and so does

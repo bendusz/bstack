@@ -48,6 +48,33 @@ two arms differ only in the overseer's message, which the rule words. S46 also a
 text of `docs/watch.md` and of each log line, outside the 350 words, and S51 for the Decisions
 rows. S48 and S52 give no tool's answer and ask what is done for each.
 
+S56 to S62 test which skill a session enters and what that skill does on entry. Their prompt is
+this, followed by the situation. Each arm's plugin copy sits under a path that does not say which
+arm it is. "Without" is the plugin at 1.7.0 for S56, S58 and S62, and 2.0.0 with the one rule
+deleted for the others; for S57 the deleted rule is the `pm` description, put back as 1.7.0 had
+it. S27 and S55 were run again at 2.0.0, once each, to check that `setup-home` is selected and
+that its moved steps still hold; both passed.
+
+```
+You are Claude Code under T3 Code, in a session started in the folder described below. The bstack
+plugin is installed at {ROOT}; that path is what its skills call `<plugin>` or
+${CLAUDE_PLUGIN_ROOT}. First read the frontmatter of each {ROOT}/skills/*/SKILL.md and pick the
+skill that fits the moment described below, then read it and whatever it tells you to load. A
+message `/bstack:<name> <args>` invokes {ROOT}/skills/<name>/SKILL.md with `$ARGUMENTS` set to
+<args>; where the body has no `$ARGUMENTS`, the arguments follow it as `ARGUMENTS: <args>`. If no
+such skill exists there, say so and act as Claude Code would with that message. Read only files
+under {ROOT}. There is no real project, T3 host or shell here, so call no tools other than Read,
+Grep and Glob. Treat the situation as real and act as the skill would have you act. Every T3 tool
+you would call answers normally unless the situation says otherwise.
+Reply in at most 350 words with:
+SKILL: the skill or skills you read to decide.
+DECISION: what you do next, in one line.
+ACTIONS: the exact commands or tool calls you would run in this turn, in order, with nothing left
+out. For any dispatch, give the delegate_task target JSON.
+MESSAGE: the verbatim text of any message to the user or a child.
+RULES: the skill lines that decided it (file and section).
+```
+
 The merge guard is also tested mechanically: `.github/scripts/test-scripts.sh` feeds the hook real
 PreToolUse payloads against throwaway repositories.
 
@@ -104,3 +131,10 @@ PreToolUse payloads against throwaway repositories.
 | S53 | `overseer/SKILL.md` rule 8: `Board: no score` is a verdict | The situation of S52. | Sends mobile's PM the chair's return as a verdict and tells it to adopt the recommendation. | FAIL (one run): closed the meeting as failed, told the PM to merge again and dropped the recommendation | PASS (one run): `board verdict:` as the chair wrote it, `decided:` on the recommendation, `board mobile: no score, 30 min` logged |
 | S54 | `planning.md` `## 4`: a PM the overseer has told is under a home repo | The user signed the plan off three weeks ago (`approved_by: user`), with `Between sprints: pause`. Four days ago the overseer wrote that the user has put the product under a home repo and that sprint boundaries come to it. Sprint 1 of 3 is done, and the user has not written for six days. | Commits the handoff and says `SPRINT 1 DONE <commit>` for the overseer. | FAIL (one run): held that it was under no overseer, showed the user the demo and waited for their own words | PASS (one run): the handoff committed, `SPRINT 1 DONE <sha>` said in its thread, nothing sent to the user |
 | S55 | `/bstack:setup-home` step 6: a product already in flight | Setup over three repositories that are all T3 projects. storefront was signed off by the user two weeks ago and is building sprint 1; its PM works in a thread titled `storefront export`. The other two have no approval record. | Writes storefront's request file from its signed-off plan, confirms which thread is its PM and renames it `PM storefront`, and tells that PM it is under the home repo. | PARTIAL (one run): saw that no check would find the thread and asked to rename it, but wrote no request file and told the PM nothing, so its sprint boundary would still have gone to the user | PASS (one run): `docs/requests/storefront-adopted.md` at the plan commit, the thread confirmed with the user, then renamed, and the PM told |
+| S56 | `pm` `## Start`: a home repo has no PM | A home repo over three products. The user types `/bstack:pm build an order export for storefront: admins download the orders list as a CSV file.` | Names `/bstack:overseer` and stops; no plan and no approval record in the home repo. | FAIL (one run): probed the host, wrote `docs/approval.json` as pending in the home repo and asked its first planning question, noting that the PM skill had no rule for a home repo | PASS, 2 of 2: no tool call, and the overseer named with the request ready to paste |
+| S57 | `pm` description: a plain delivery request selects it | An empty repository that is a T3 project. User: "I need a small CLI that renames photos by the date they were taken. Build it end to end." | Selects `pm`, probes the host and starts planning; builds nothing. | FAIL (one run): no skill fitted, so it wrote the CLI and its tests itself and committed them | PASS, 2 of 2: `pm` selected, the pending approval record and the first planning question |
+| S58 | `/bstack:setup-project` | A repository with a manifest, source and tests and no bstack files, already a T3 project. User: "Prepare this repository for bstack. Don't plan anything yet, I'll come back with the work tomorrow." | The scaffold and nothing else: no plan, no approval record, no log line, no question about the product. | FAIL (one run): no skill fitted, so it ran the readiness check, wrote nothing and said the scaffold comes after sign-off | PASS, 2 of 2: `AGENTS.md` with the manifest's commands, the bridge, the `tmp/` line and the hook, committed on the checked-out branch, then doctor and `/bstack:pm` named |
+| S59 | `scaffold.md`: a folder with nothing to describe gets no `AGENTS.md` and no bridge | An empty repository with no commits. The user types `/bstack:setup-project`. | No `AGENTS.md` and no `CLAUDE.md`; `.gitignore` committed and the hook installed. | FAIL (one run): wrote an `AGENTS.md` whose commands were all `N/A` and whose Layout said "Empty", and the bridge to it | PASS, 2 of 2: only `.gitignore` committed, the hook untracked, and the user told the PM writes both files after sign-off |
+| S60 | `/bstack:setup-project` step 3: a project a PM already manages | The session is in `src/` of a project with an approved record and a release candidate waiting for the user's walk-through. Its `.gitignore` lacks `tmp/` and its hook manager does not call the scan. The user types `/bstack:setup-project`. | Writes nothing and names `/bstack:doctor`. | FAIL (one run): appended `tmp/` to `.gitignore` and committed on `main`, past the release candidate, and proposed the husky line | PASS, 2 of 2: named the root and asked, then stopped on the approval record with nothing written |
+| S61 | `/bstack:overseer` `## What was asked`: a scheduled check left on the old prompt | A home repo whose one scheduled task runs `/bstack:home check` every 30 minutes, bound to a thread, paused. The user types `/bstack:overseer` with a request for storefront, and says yes when asked. | Names the task and asks; updates it by id with the prompt alone, so it stays paused at 30 minutes on its thread; files the request. | FAIL (one run): filed the request and left the task, noting that nothing in the skill mentioned it | PASS, 2 of 2: asked, `schedule_task` with `scheduledTaskId` and `prompt` only, read back as still paused, then the request filed and sent |
+| S62 | `/bstack:doctor` `## Home` step 2: `OUTDATED` | The user types `/bstack:doctor` in a home repo with three registered products. Its one task is enabled and runs `/bstack:home check` every 20 minutes, and `docs/watch.md` was written two days ago. | `OUTDATED`, not `OVERDUE`; not watching; `/bstack:overseer` named as the repair. | FAIL (one run): `OVERDUE`, with advice to find out why the task is not firing | PASS, 2 of 2: `OUTDATED` because the skill is gone, the verdict not watching and the repair named |

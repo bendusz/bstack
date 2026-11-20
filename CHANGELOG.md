@@ -12,41 +12,46 @@ be set up only as a side effect of delivery. It is a major version because two s
 
 **Role skills**
 - `/bstack:pm` is the PM. The `project-manager` skill and the old `pm` entry point are one skill,
-  `skills/pm/`, with the references under it. It resumes a project that has an approval record,
-  plans a request where there is none, and in a home repo names the overseer and stops.
+  `skills/pm/`, with the references under it. It resumes a project that has an approval record
+  and plans a request where there is none. In a home repo it names the overseer and stops;
+  before, it planned the product inside the home repo and wrote an approval record there.
 - `/bstack:overseer` is the overseer of a home repo: `check`, `seen`, `lint`, `new` and requests,
   as `/bstack:home` took them. Its soul, tools and rules are in the skill's body, so they come
-  back after compaction. With no argument it shows what needs you and what was decided for you.
-  Outside a home repo it names `/bstack:setup-home` and sets nothing up.
+  back after compaction.
 
 **Setup skills**
 - `/bstack:setup-project` prepares a repository before any plan: the T3 project, `AGENTS.md`
   from what the code shows, the `CLAUDE.md` bridge, the `tmp/` ignore line and the pre-push
   secret scan. It writes no plan, approval record or log line. It stops in a home repo and in a
-  project a PM already manages. An empty repository gets neither `AGENTS.md` nor the bridge; the
-  PM writes both after sign-off.
+  project a PM already manages, where its commit would have landed on top of an open release
+  candidate. An empty repository gets neither `AGENTS.md` nor the bridge; the PM writes both
+  after sign-off.
 - `/bstack:setup-home` is `/bstack:home setup`, and takes on no role.
 - The scaffold steps live in `references/scaffold.md`, which `/bstack:setup-project` and the PM
   after sign-off both follow. `planning.md` `## 5` keeps only what needs the plan.
 
-**The PM**
-- On a resume, a message that came with it (a hold, an acceptance, a stop) is taken before any
-  story is re-entered.
-- A project that is approved and has no stories gets its scaffold before decomposition, so a
-  session that ended right after sign-off no longer skips it.
-- `pm/SKILL.md` may be 6,490 bytes, up from 6,257: it carries the start that the separate `pm`
-  entry point held in 948 bytes of its own.
-
 **Checks**
 - `/bstack:doctor` reports a scheduled task that still runs `/bstack:home check` as `OUTDATED`.
 - `check.sh` requires the child guard as the first line of every bstack skill.
+- `pm/SKILL.md` may be 6,430 bytes, up from 6,257: it carries the start that the separate `pm`
+  entry point held in 948 bytes of its own.
+
+**Tried and not added**
+Each of these did the right thing without the line written for it (`docs/evals.md`, Method).
+- A resume takes a hold that arrived with it before re-entering a story.
+- A project approved with no stories is scaffolded before it is decomposed.
+- A PM loaded by `/bstack:doctor` on a project mid-sprint runs the readiness check only.
+- `/bstack:overseer` outside a home repo names `/bstack:setup-home` and sets nothing up.
+- `/bstack:overseer` with no argument shows what needs you and what was decided for you, and
+  runs no check.
 
 **Upgrade**
 - `/bstack:home setup` is now `/bstack:setup-home`. Every other `/bstack:home <x>` is
   `/bstack:overseer <x>`.
-- In each home repo, run `/bstack:overseer` once and say yes when it asks about the scheduled
-  check. It changes the task's prompt and keeps its interval, thread and pause. Until then the
-  task runs a skill that no longer exists and no product is checked. `/bstack:doctor` says so.
+- In each home repo, run `/bstack:overseer` with any request and say yes when it asks about the
+  scheduled check. It changes the task's prompt and keeps its interval, thread and pause. Until
+  then the task runs a skill that no longer exists and no product is checked. `/bstack:doctor`
+  says so.
 - Projects need nothing.
 
 ## 1.7.0 - 2026-11-19

@@ -16,7 +16,6 @@ Check what a child returns against the repository, never against its summary.
 The message is `$ARGUMENTS`, or the request that selected this skill.
 - A home repo (`## Repos` in this folder's `AGENTS.md`) has no PM: name `/bstack:overseer` and
   stop.
-- Another bstack skill loaded you: it says what to do.
 - `docs/approval.json` exists: resume (`references/state.md` `## Resume`).
 - Otherwise plan the message (`references/planning.md`). With no message, say the folder has no
   plan and ask what the user wants.
