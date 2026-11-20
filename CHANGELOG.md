@@ -61,13 +61,15 @@ major version because two skill names go.
 - The charter is the user's: goals with their checks, what the operator does unasked, what waits
   for a yes, and what no agent runs. The ops guard, a second hook (`ops-guard.sh`), reads the
   last list from the committed charter and refuses any command that matches it, for every agent
-  in that repository.
+  in that repository and for a command that reaches into it from another folder. It refuses an
+  agent's commit that takes a line out of that list, which only the user commits.
 - Under a home repo the overseer sends a request to run or use a product to its `OPS <repo>`
   thread and no longer to a PM, reads each operator's status and messages at the check, lists
   every `INCIDENT`, `FIX NEEDED` and ask-first question under `Needs you`, and shows `ops` in
   each product's line.
 - `log.sh "<message>" ops` writes the operator's log, `docs/ops/log.md`. The merge guard counts
-  `docs/ops/` with the PM's records, so an operator's commit voids no gate or verifier result.
+  the operator's status, log and runbook with the PM's records, so a round's commit voids no
+  gate or verifier result; a change to the charter does.
 
 **Checks**
 - `/bstack:doctor`, where a repository is set up for operation, reports the ops guard, whether

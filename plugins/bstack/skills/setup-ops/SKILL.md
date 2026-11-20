@@ -55,7 +55,8 @@ charter already answers.
    `printf '%s\n' '<command>' | grep -Eq -e '<pattern>'`.
 6. Show the user both files. The charter is theirs: commit only on their "approved", with
    `git add docs/ops` and `git commit -m "ops: charter and runbook" -- docs/ops`. From that
-   commit on, the plugin's ops guard refuses the `## Never` commands for every agent here.
+   commit on, the plugin's ops guard refuses the `## Never` commands for every agent here, and
+   any commit of theirs that takes a line out of `## Never`.
 7. With rounds on a schedule, and no task in `list_scheduled_tasks` that has this prompt and is
    bound to a thread of this project: `schedule_task` with prompt `/bstack:operator round`,
    `schedule` `{"type":"interval","everyMs":<ms>}`, `bindToCurrentThread: true` and

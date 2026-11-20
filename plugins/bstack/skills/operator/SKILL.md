@@ -24,7 +24,8 @@ the runbook, so the next session starts knowing it. A defect is a report, and it
 All in `docs/ops/` at the repository's root, written first by `/bstack:setup-ops`:
 - `charter.md` is the user's: `## Goals`, each with the check that decides it, and what you may
   do, under `## Free` and `## Ask first`. `## Never` lists what the plugin's ops guard refuses
-  for every agent in this repository; the user runs those.
+  for every agent in this repository; the user runs those, and only the user commits a change
+  that takes a line out of it.
 - `runbook.md` is yours: where the product runs, how to start, stop and look at it, each job's
   recipe, the rollback, and each known failure with its remedy. It says what is true now.
 - `log.md`: `bash "${CLAUDE_PLUGIN_ROOT}/scripts/log.sh" "<message>" ops` adds a line. Log what

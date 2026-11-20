@@ -173,6 +173,9 @@ git switch -q pm/S1-1-a; mkdir -p docs/board; echo "# Board status" > docs/board
 expect "guard: board minutes keep the shas valid" 0 "" hook "$mg" "$M"
 git switch -q pm/S1-1-a; mkdir -p docs/ops; echo "OK" > docs/ops/status.txt; commit "ops status"; git switch -q main
 expect "guard: the operator's records keep the shas valid" 0 "" hook "$mg" "$M"
+git switch -q pm/S1-1-a; echo "# Charter" > docs/ops/charter.md; commit "charter on a story branch"; git switch -q main
+expect "guard: a charter changed on the story branch voids the shas" 2 "change docs/ops/charter.md" hook "$mg" "$M"
+git switch -q pm/S1-1-a; git reset -q --hard HEAD~1; git switch -q main
 expect "guard: a message naming another story is not an operand" 0 "" hook "$mg" "git merge -m \"pm/S1-2-b\" pm/S1-1-a"
 git branch -q pm/S1-2-b main
 expect "guard: two stories in one merge block" 2 "one story per merge" hook "$mg" "git merge pm/S1-1-a pm/S1-2-b"
@@ -388,6 +391,31 @@ expect "ops guard: an uncommitted edit of the charter changes nothing" 2 "under 
 git checkout -q -- docs/ops/charter.md
 expect "ops guard: setting the switch in a command is refused" 2 "the user's switch" ohook "$og" "BSTACK_NO_ENFORCE=1 terraform plan"
 expect "ops guard: the user's switch turns it off" 0 "" ohook "$og" "terraform apply" BSTACK_NO_ENFORCE=1
+# another repository reached from outside: a home folder with the product nested in it
+mkdir "$work/home" && cd "$work/home" && git init -q -b main . || exit 2
+git config user.name test && git config user.email test@example.invalid
+echo home > README.md && commit init
+git clone -q "$og" product
+expect "ops guard: cd into a product meets its charter" 2 "under ## Never" ohook "$work/home" "cd product && terraform apply"
+expect "ops guard: a subshell that cds is seen" 2 "under ## Never" ohook "$work/home" "(cd \"product\"; terraform destroy)"
+expect "ops guard: a path into a product meets its charter" 2 "--live" ohook "$work/home" "product/a.txt --live"
+expect "ops guard: a path after = names the repository" 2 "under ## Never" ohook "$work/home" "env CONFIG=product/a.txt terraform apply"
+expect "ops guard: the home repo's own commands pass" 0 "" ohook "$work/home" "terraform apply"
+expect "ops guard: a command that only names the product passes" 0 "" ohook "$work/home" "git -C product status"
+expect "ops guard: the session's project answers from another cwd" 2 "under ## Never" ohook "$work" "terraform apply" CLAUDE_PROJECT_DIR="$og"
+# taking a line out of ## Never is the user's commit
+cd "$og" || exit 2
+grep -v 'terraform' docs/ops/charter.md > c.tmp && mv c.tmp docs/ops/charter.md
+expect "ops guard: a commit of a charter that lost a line is refused" 2 "Only the user commits" ohook "$og" "git commit -am \"ops: charter\""
+git add docs/ops/charter.md && git checkout -q HEAD -- a.txt
+git show HEAD:docs/ops/charter.md > docs/ops/charter.md
+expect "ops guard: a staged charter that lost a line is refused" 2 "Only the user commits" ohook "$og" "git commit -m \"ops: charter\""
+git reset -q --hard HEAD
+awk '{ print } /^## Never/ { print "- `kubectl delete`: the cluster is the user\047s" }' docs/ops/charter.md > c.tmp \
+  && mv c.tmp docs/ops/charter.md
+git add docs/ops/charter.md
+expect "ops guard: a commit that only adds lines passes" 0 "" ohook "$og" "git commit -m \"ops: one more line\""
+git reset -q --hard HEAD
 cd "$work" || exit 2
 
 printf '%s checks, %s failed\n' "$n" "$fails"

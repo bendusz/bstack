@@ -50,7 +50,9 @@ Where a machine can check a rule, a script does:
   is not red, and it merges one story at a time. Only you can switch it off, by starting Claude
   Code with `BSTACK_NO_ENFORCE=1`.
 - **Ops guard.** A second hook refuses any command that a repository's `docs/ops/charter.md`
-  lists under `## Never`, for every agent working there. The same switch turns it off.
+  lists under `## Never`, for every agent working there or reaching into it from another
+  folder. It also refuses an agent's commit that takes a line out of that list: only you
+  commit that. The same switch turns it off.
 - **`ledger.sh`.** One row per reviewed story's outcome, merged or not: its lineage, rounds,
   first-pass, reruns, wall time and model per role. It counts no tokens: tracking them would pull
   the PM's attention off the work.
