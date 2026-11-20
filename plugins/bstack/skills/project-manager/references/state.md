@@ -39,6 +39,7 @@ The claim commit, on the integration branch and before any dispatch, appends to 
 
 ## PM records
 The PM's records, never a story's code: `docs/stories/`, `docs/evidence/`, `docs/retros/`,
+`docs/board/`,
 `docs/log.md`, `docs/ledger.md`, `docs/plan.md`, `docs/handoff.md`, `docs/go-no-go.md`,
 `docs/acceptance-differences.md`,
 `docs/approval.json`, `docs/acceptance.json` and `docs/gate.txt`. A commit that touches only these
@@ -65,6 +66,8 @@ leaves a gates or verifier sha valid; the merge guard holds the same list.
 At each sprint boundary, after the demo, rotate the PM thread: write `docs/handoff.md` from
 `<plugin>/templates/handoff.md.template`, commit it, and tell the user to continue in a new
 thread with `/bstack:resume`. Long threads lose rules to compaction; a fresh one reads them again.
+Under an overseer, say `SPRINT <n> DONE <commit>`: it starts the new thread when it accepts the
+sprint (`planning.md` `## 4`).
 
 ## Resume
 Read, in order: `docs/handoff.md` if present, then skip what its SKIP line lists; `docs/approval.json`; `git log --first-parent <integration branch>`; every

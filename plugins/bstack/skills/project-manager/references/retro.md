@@ -56,7 +56,9 @@ Write `docs/retros/sprint-<n>.md` from `<plugin>/templates/retro.md.template`; i
 from `docs/ledger.md`.
 Commit it with any accepted `AGENTS.md` change as `chore(retro): sprint <n>`, `docs/log.md`
 staged, and log the outcome. Show the user the record, led by `## Demo`, then write the handoff
-(`state.md` `## Handoff`) and decompose the next sprint (`planning.md`). After the last sprint, write `docs/completion-report.md` from
+(`state.md` `## Handoff`) and decompose the next sprint (`planning.md`). Under an overseer the
+record goes to it, not the user: write the handoff and say `SPRINT <n> DONE <commit>`
+(`planning.md` `## 4`). After the last sprint, write `docs/completion-report.md` from
 `<plugin>/templates/completion-report.md.template` instead, never while a
 cross-story `block` or `major` is open: each is merged as a fix or has the user's logged ruling.
 

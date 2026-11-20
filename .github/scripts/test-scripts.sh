@@ -168,6 +168,8 @@ expect "guard: gates and verifier at the head pass" 0 "" hook "$mg" "$M"
 expect "guard: a quoted message naming pm/ still finds the branch" 0 "" hook "$mg" "$M -m \"feat: merge pm/S1-1-a\""
 git switch -q pm/S1-1-a; echo "- J1 label wording" > docs/acceptance-differences.md; commit "accept a difference"; git switch -q main
 expect "guard: recording an accepted difference keeps the shas valid" 0 "" hook "$mg" "$M"
+git switch -q pm/S1-1-a; mkdir -p docs/board; echo "# Board status" > docs/board/20261118-151500-status.md; commit "board minutes"; git switch -q main
+expect "guard: board minutes keep the shas valid" 0 "" hook "$mg" "$M"
 expect "guard: a message naming another story is not an operand" 0 "" hook "$mg" "git merge -m \"pm/S1-2-b\" pm/S1-1-a"
 git branch -q pm/S1-2-b main
 expect "guard: two stories in one merge block" 2 "one story per merge" hook "$mg" "git merge pm/S1-1-a pm/S1-2-b"

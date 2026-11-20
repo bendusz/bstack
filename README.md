@@ -95,6 +95,8 @@ Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <r
    the PM cuts the plan down to that design and it stays as the platform's documentation: a
    technical writer reads it without the code and lists what a rebuild would have to guess, and
    the PM fills that in. A `docs/spec.md` holds the product intent when it needs its own file.
+   Before you see a plan of more than one story, a researcher lists the maintained libraries
+   and services that already provide each part the design builds itself.
 2. **Sign-off, in conversation.** Nothing is built until you say "approved", recorded in
    `docs/approval.json`. Under a [home repo](#home-repo), its overseer may give that sign-off.
 3. **Stories.** Each sprint becomes self-contained files under `docs/stories/`, tracing to the plan's IDs.
@@ -122,7 +124,7 @@ the fallback and logs it.
 | reviewer | Reviews the diff against the story; never the builder | The family that did not build: Codex `gpt-6.2-astra` xhigh after a Claude build, `claude-opus-5-5` high after an Astra build |
 | verifier | Checks each acceptance criterion, the sprint's journeys and the release candidate | `claude-opus-5-5` high (Codex `gpt-6.2-sol` xhigh) |
 | technical writer | Reads each story's diff against the plan's Design before the merge, and reads the shipped plan cold for what a rebuild would have to guess | `claude-sonnet-5-5` high (`claude-opus-5-5` medium) |
-| researcher (optional) | Answers one external question, report under `docs/research/` | Codex `gpt-6.2-sol` high (`claude-opus-5-5` high) |
+| researcher | Answers one external question, and checks every plan of more than one story for parts a library already provides; report under `docs/research/` | Codex `gpt-6.2-sol` high (`claude-opus-5-5` high) |
 | spec-architect (optional) | Writes the SpecDD `.sdd` files for a sprint | `claude-opus-5-5` high (Codex `gpt-6.2-astra` high) |
 
 The PM runs on whatever model you choose; the plan records it as `PM model:`. A home repo's
@@ -136,7 +138,7 @@ Each is a skill: run it as `/bstack:<name>`, or describe the task and Claude pic
 |---|---|
 | `/bstack:pm` | Act as the PM end to end: plan, sign-off, stories, loop, ship. |
 | `/bstack:resume` | Pick up from git, the approval record, the story Execution blocks and the log. |
-| `/bstack:doctor` | Check the T3 host, the toolchain, the project's gates, Codex, `log.sh`, the secret scan, the merge guard and project hygiene. |
+| `/bstack:doctor` | Check the T3 host, the toolchain, the project's gates, Codex, `log.sh`, the secret scan, the merge guard and project hygiene. In a home repo, check that the overseer's scheduled check is running and each product is visible to it. |
 | `/bstack:retro` | Run the sprint boundary's cross-story review and retrospective. |
 | `/bstack:codex` | `review` a commit, worktree, branch or codebase with Codex, or `ask` it a question. |
 | `/bstack:skeleton` | Write or extend the SpecDD skeleton for a sprint. |
@@ -172,20 +174,50 @@ go to `docs/board/` in a project the PM manages, and to `tmp/board/` anywhere el
 `/bstack:home` turns a folder that holds several product repositories into a home repo, with
 Claude as its overseer. The home repo delivers nothing: it has no plan, approval record or
 stories. Each product keeps its own PM, in its own T3 project and thread, with its own gates and
-merge guard.
+merge guard. The overseer answers for you wherever the answer is not yours alone, so a product
+you are not watching keeps moving.
 
 - **Setup** registers each nested repository as a T3 project, asking first, and writes an
   `AGENTS.md` with one pointer per repository, a wiki index and a `.gitignore` for the nested
-  repositories. A thread started in a nested repository works from its own project's
+  repositories. A product that is already building comes under the overseer too: setup asks
+  which thread is its PM, renames it `PM <repo>` and tells that PM where its questions go. A thread started in a nested repository works from its own project's
   instructions: Claude reads the lines of the home `CLAUDE.md` but not the `AGENTS.md` it imports,
   and Codex reads neither. So the home `CLAUDE.md` stays that one import line.
+- **New products.** Give the overseer a scope and a name. It creates the folder and its git
+  repository, registers the T3 project, files your words as the request and starts the PM. It
+  adds no remote and pushes nothing.
 - **Requests.** Tell the overseer what a product needs. It keeps your words in `docs/requests/`,
   starts or messages that product's PM, and signs off the PM's plan when it covers what you
-  asked. Before it approves a plan of more than one sprint it convenes the board. Scope and date
-  changes, waivers, pushes, secrets, the release walk-through and go/no-go stay yours: it passes
-  the PM's question to you as the PM wrote it.
+  asked and, in a plan of more than one story, names the libraries considered for each part the
+  product builds itself, or says the research found none. Before it approves a plan of more
+  than one sprint it convenes the board.
+- **Answers.** A PM's question goes to the overseer. It quotes your request or the wiki when
+  they answer it. Otherwise it reads the product's plan, decides how a requirement you stated
+  is met, tells the PM and records the decision in the request file. A preference you state
+  that covers every product goes into the wiki as a standard. It accepts each sprint's demo and starts the next
+  sprint in a new PM thread.
+- **Yours alone.** A scope or date change, a waiver, a push, a secret, money, the release
+  walk-through, a go/no-go and anything that cannot be undone. So is a change of direction: a
+  board recommendation that changes the scope, the architecture or the plan, or any change that
+  replaces what merged stories built, whoever proposes it. Each waits for you in the PM's or the
+  chair's words, and the PM carries on with the plan as signed off. A PM's own escalation
+  names a default and a time. If you have not answered by then, that default applies, and it
+  leaves the scope and the date as signed off: changing either takes your own words.
+- **The board.** While a product builds, the overseer convenes a status meeting 4 hours after
+  sign-off and every 8 hours after that, and only when a story has merged since the last one.
+  Setup asks for other hours, or never. The PM holds merges while the board reads the tree, for
+  at most two hours; a meeting that fails releases the hold. The verdict goes to the PM. The
+  overseer may tell the PM to adopt a recommendation that stays inside the plan.
 - **Check-ups.** A scheduled check, every 20 minutes unless you choose otherwise, reads each
-  product's gate, stories and PM thread, and acts on what changed.
+  product's gate, stories and PM thread, and acts on what changed. It keeps `docs/watch.md`:
+  what needs you, what was decided for you and one line per product. `/bstack:home seen`
+  clears the decided list once you have read it. Its first line is the time of the last check.
+- **What it costs.** Each check is a fresh session that reads every product: 72 a day at 20
+  minutes, whether or not anything changed. A board meeting is nine runs, eight member runs and
+  a chair, and at the default hours a product that is building gets at most three a day.
+- **Is it still watching?** `/bstack:doctor` in the home repo says whether the scheduled check
+  is there, enabled and on time, and whether each product is still a repository and a T3
+  project. Nothing else tells you that the checks have stopped.
 - **Wiki.** `wiki/` holds what is true across the products: contracts between them, shared
   standards, the glossary and lessons that apply to more than one. Tell the overseer something
   to remember, ask it a question, or run `/bstack:home lint`.

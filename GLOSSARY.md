@@ -73,11 +73,14 @@ them, the wiki and the overseer's records.
 _Avoid_: workspace, monorepo
 
 **Overseer**:
-The agent that runs a home repo. It starts each product's PM, passes on the user's words, signs
-off a plan that covers them and keeps the wiki. It plans, builds and merges nothing.
+The agent that runs a home repo. It creates a product from its scope, starts each product's PM,
+passes on the user's words, signs off a plan that covers them, answers what a PM asks unless the
+answer is the user's alone, accepts each sprint, convenes the board and keeps the wiki. It
+plans, builds and merges nothing.
 _Avoid_: lead, manager, orchestrator
 
 **Request**:
 The user's words for a piece of work, kept exactly as said in the home repo. A plan is signed
-off against it.
+off against it. For a product that was signed off before it came under the home repo, the
+request is a pointer to the Scope and Requirements of that plan.
 _Avoid_: ticket, ask

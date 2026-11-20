@@ -3,6 +3,93 @@
 All notable changes to this project are documented here. Entries before 0.30.0 are in git
 (tag `v0.29.4`).
 
+## 1.7.0 - 2026-11-19
+
+Lets a home repo's overseer keep several products moving while the user is busy with one. Two
+failures drove it: a product that stalled on questions anyone could have answered, and a PM that
+spent three weeks building what an existing library provides. Each rule was kept only because
+its scenario went wrong without it (`docs/evals.md` S35 to S55).
+
+**The overseer**
+- It answers a PM's question unless the answer is the user's alone. It quotes the request or the
+  wiki when they answer it. Otherwise it reads the product's plan, decides how a stated
+  requirement is met, sends `decided:` with the why and records it in the request file. A question that adds or drops a
+  requirement is a scope change and still goes to the user.
+- The user's alone now also covers money, a `.scan-secrets-allow` line, anything that cannot be
+  undone, a board recommendation marked `Decides: user`, and any other change of direction: a
+  Design change that replaces what a merged story built, whoever proposes it. Without that, the
+  overseer picked between a one-week library swap and a two-week repair itself.
+- It accepts a sprint whose demo passed the journey gate and shows nothing outside the request,
+  and starts the next sprint in a new PM thread with `/bstack:resume`.
+- It signs off a plan of more than one story only when the Decisions table names the libraries
+  considered for each part the product builds itself, or says the research report found none.
+- Setup takes over a product that is already in flight. It files the product's signed-off plan
+  as the request, renames its PM's thread `PM <repo>` once the user has said which thread that
+  is, and tells the PM that its questions and sprint boundaries now come to the overseer. A PM
+  told so sends them there. Before, a product the user had signed off kept waiting for the user
+  at every sprint boundary.
+- `/bstack:home new <name> <scope>` creates the folder, its git repository and the T3 project,
+  files the request and starts the PM, with no further question and no push.
+- It convenes a board status meeting on each product 4 hours after sign-off and every 8 hours
+  after that, only when a story has merged since the last one. Setup asks for the hours. The
+  verdict goes to the PM. The overseer may tell the PM to adopt a recommendation that stays
+  inside the plan; one that changes the scope, the architecture or the plan waits for the user.
+- The PM holds merges while the board reads the tree, and the hold ends on its own two hours
+  after it began. A meeting that fails or is still running then is recorded in `docs/watch.md`
+  as failed, the PM is told to merge again, and the next meeting is due by the hours. A condition
+  against convening a second meeting beside an open one was tried and not added: the overseer
+  already left a running meeting alone.
+- `docs/watch.md` leads with `Needs you` and `Decided for you`, and each check that changes
+  either shows them. `/bstack:home seen` clears the second.
+- A check reads what each PM has said with `t3_thread_read`, the idle ones too: `PLAN READY`
+  and `SPRINT <n> DONE` are ordinary messages, and an idle thread with no pending request was
+  being skipped. `Board: no score` is a verdict, and its recommendations reach the PM.
+- Every check writes its time and length on the first line of `docs/watch.md`, so a file whose
+  time is old says the checks have stopped. It is committed with the next change below it. A
+  board verdict is logged with its score and how long the meeting took.
+- A fixed `UNKNOWN` line for a product whose checkout or thread cannot be read was tried and not
+  added. The overseer already wrote that it could not read the product, sent its PM nothing and
+  listed it for the user.
+- A line telling the overseer to write a preference the user states into the wiki was tried and
+  not added. When the user overturned a decision with a reason that covers every product, the
+  overseer already wrote it to the wiki as a standard.
+
+**The PM**
+- A plan of more than one story gets one researcher dispatch before it is presented, asking
+  which maintained libraries or services already provide each part the Design builds itself.
+  Every such part gets a Decisions row, also when the report found no library, so the
+  overseer's sign-off does not send the plan back for it.
+- A Design change after sign-off that replaces what a merged story built is a change of
+  direction and the user's. The PM asks for their words and builds what does not depend on the
+  answer. Before, it made the swap itself.
+- Under an overseer, the PM takes `decided:` as the answer to a clarification without asking the
+  user to confirm, and ends a sprint boundary with `SPRINT <n> DONE <commit>` for the overseer.
+- Two lines were tried and not added. Without them the PM already held merges for a board
+  meeting, lifted the hold on the verdict, adopted the recommendation inside the plan and sent
+  the change of direction to the user.
+- A limit on the PM's timed default was tried and not added: under an overseer, a decision that
+  is the user's alone would default to nothing changing. Without it, in two runs, a PM blocked
+  between dropping a requirement and moving the date already named a default that kept both as
+  signed off. With nothing else to build, it started the rewrite that keeps the requirement as
+  a new story, to cancel if the user drops the requirement.
+- A review asked for eight more lines, and each was tried and not added because the scenario
+  passed without it. The PM already sent a researcher before swapping a library for its own
+  code, stopped at `SPRINT <n> DONE` when the plan said `Between sprints: autonomous`, and
+  applied the retro's `AGENTS.md` lines from the record in the new thread. The overseer already
+  answered a pending request where it waits, answered a planning question before a plan
+  existed, wrote the user's scope answer into the request file, passed a secret through
+  `request_secret` and never as text, and kept the one scheduled check when setup ran again.
+
+**The doctor**
+- In a home repo `/bstack:doctor` checks the overseer and no product: the scheduled check is
+  there, enabled and not overdue against twice its interval, a check takes less time than its
+  interval, and each product is a git repository and a T3 project. It names what the schedule and
+  the board cost. Before, it ran the product checks on the home folder and found it not ready.
+
+**The merge guard**
+- `docs/board/` is a PM record. A commit of board minutes no longer voids a story's gates or
+  verifier sha, which a meeting every 8 hours would otherwise do to every open story.
+
 ## 1.6.0 - 2026-11-18
 
 Moves the Codex roles to `gpt-6.2-astra` and `gpt-6.2-sol`, seats a fourth board member and

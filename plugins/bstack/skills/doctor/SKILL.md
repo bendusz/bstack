@@ -1,6 +1,6 @@
 ---
 name: doctor
-description: Check readiness before implementation, covering the T3 host, the toolchain, whether the project's gates pass, Codex availability, log.sh and the pre-push secret scan.
+description: Check readiness before implementation, covering the T3 host, the toolchain, whether the project's gates pass, Codex availability, log.sh and the pre-push secret scan. In a home repo, check that the overseer's scheduled check is still running and every product is visible to it.
 argument-hint: "[sub-path or component]"
 ---
 
@@ -9,6 +9,9 @@ If you were dispatched as a child agent (your task begins 'You are a bstack … 
 `references/…` below means `${CLAUDE_PLUGIN_ROOT}/skills/project-manager/references/…`, and
 `<plugin>` in any reference means `${CLAUDE_PLUGIN_ROOT}`. Neither is a shell variable: write the
 path out in every command.
+
+In a home repo (its `AGENTS.md` has `## Repos`), run `## Home` at the end instead of what
+follows: a home repo has no plan, gates or merge guard of its own.
 
 Run the `bstack:project-manager` skill's procedure (load that skill first) for a readiness check.
 Install or upgrade nothing, and write no file of your own. Running a gate may leave the artifacts
@@ -69,3 +72,25 @@ Check, in order, each with its evidence:
 End with a one-line verdict: ready only when the host, toolchain, Codex, log, secret scan and
 merge guard checks are `OK` and every gate is `PASS` or `N/A`. Otherwise name the blockers and
 what each needs. Hygiene warnings never block; list them after the verdict.
+
+## Home
+Whether the overseer is still watching. Schedule, register and write nothing. Check, in order,
+each with its evidence:
+1. **T3 host**, as step 1 above, loading `list_scheduled_tasks` and `t3_project_list` with it.
+2. **Scheduled check**, `OK`, `MISSING`, `PAUSED` or `OVERDUE`. `list_scheduled_tasks` holds one
+   task whose prompt is `/bstack:home check`. None is `MISSING`, and one that is not enabled is
+   `PAUSED`: no product is being watched, and nothing else will say so. `OVERDUE`: the first
+   line of `docs/watch.md`, `Checked <time>, took <n> min`, is older than twice the task's
+   interval, or absent although a check has been due. `OK` names the interval and the sessions a day it starts (72 at 20
+   minutes). Two such tasks double that: name both.
+3. **Check length**, `OK` or `SLOW`. `SLOW` when `took <n> min` is at or over the interval.
+4. **Products**, one line for each pointer under `## Repos`: `OK`; `MISSING`, with no git
+   repository at its path; or `UNREGISTERED`, with no T3 project whose `workspaceRoot` is that
+   path.
+5. **Board hours.** Name the `Status meeting:` line under `## Board` and what it costs: nine
+   runs a meeting, and how many meetings a day those hours allow each product that is building
+   (three at the default).
+
+End with a one-line verdict: watching only when the host and the scheduled check are `OK` and
+every product is `OK`. Otherwise name what each needs; `/bstack:home setup` schedules a check
+and registers a product, asking first.
