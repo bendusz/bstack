@@ -95,16 +95,17 @@ done
 
 # 6. The only code in the plugin is its scripts, executable, with LF endings, and the hook that
 #    runs one of them.
-scripts="hygiene.sh ledger.sh log.sh merge-guard.sh scan-secrets.sh"
+scripts="hygiene.sh ledger.sh log.sh merge-guard.sh ops-guard.sh scan-secrets.sh"
 code=$(git ls-files "$b" | grep -vE '\.(md|json|template)$' | sort | tr '\n' ' ')
 want=$(for s in $scripts; do printf '%s/scripts/%s ' "$b" "$s"; done)
-if [ "$code" = "$want" ]; then ok "the plugin's only code is its five scripts"
+if [ "$code" = "$want" ]; then ok "the plugin's only code is its six scripts"
 else bad "unexpected non-prose files in the plugin: $code"; fi
 if grep -q '"PreToolUse"' "$b/hooks/hooks.json" 2>/dev/null \
    && grep -q 'CLAUDE_PLUGIN_ROOT}/scripts/merge-guard.sh' "$b/hooks/hooks.json" \
+   && grep -q 'CLAUDE_PLUGIN_ROOT}/scripts/ops-guard.sh' "$b/hooks/hooks.json" \
    && python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$b/hooks/hooks.json" 2>/dev/null; then
-  ok "hooks/hooks.json runs merge-guard.sh on PreToolUse"
-else bad "hooks/hooks.json is missing, invalid, or does not run scripts/merge-guard.sh"; fi
+  ok "hooks/hooks.json runs merge-guard.sh and ops-guard.sh on PreToolUse"
+else bad "hooks/hooks.json is missing, invalid, or does not run both guards"; fi
 # Exec form (`args`) resolves `bash` on PATH, which on Windows is often WSL's bash.exe, not Git Bash.
 if grep -q '"args"' "$b/hooks/hooks.json"; then
   bad "hooks/hooks.json uses exec form (args); write the shell form so Windows runs it through Git Bash"

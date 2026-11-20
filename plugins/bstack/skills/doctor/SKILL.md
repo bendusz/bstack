@@ -1,6 +1,6 @@
 ---
 name: doctor
-description: Check readiness before implementation, covering the T3 host, the toolchain, whether the project's gates pass, Codex availability, log.sh and the pre-push secret scan. In a home repo, check that the overseer's scheduled check is still running and every product is visible to it.
+description: Check readiness before implementation, covering the T3 host, the toolchain, whether the project's gates pass, Codex availability, log.sh and the pre-push secret scan. In a repository set up for operation, check the ops guard, the operator's rounds and the runbook. In a home repo, check that the overseer's scheduled check is still running and every product is visible to it.
 argument-hint: "[sub-path or component]"
 ---
 
@@ -68,10 +68,26 @@ Check, in order, each with its evidence:
    too long ahead of main, a tag missing from main, branches or worktrees of merged stories, PM
    scripts outside a tracked `ops/pm/`, struck-through or superseded text left in the plan, spec
    or `AGENTS.md`. Each names its fix.
+9. **Operation**, only where `docs/ops/charter.md` exists. Load `list_scheduled_tasks` for it.
+   - **Ops guard**, `OK`, `NONE`, `OFF` or `BROKEN`. Feed it a payload it must refuse:
+     `printf '{"cwd":"%s","tool_input":{"command":"BSTACK_NO_ENFORCE=1 true"}}' "$PWD" | bash "${CLAUDE_PLUGIN_ROOT}/scripts/ops-guard.sh"`
+     Exit 2 naming "the user's switch" is `OK`. Exit 0 is `NONE`: the committed charter has no
+     `## Never` pattern, so nothing is refused. Anything else is `BROKEN`, with the output
+     quoted. `OFF` as in step 7.
+   - **Rounds**, `OK`, `MISSING`, `PAUSED`, `OVERDUE` or `ON REQUEST`. The charter's `Rounds:`
+     gives the interval; `on request` is `ON REQUEST`. Otherwise `list_scheduled_tasks` holds a
+     task with prompt `/bstack:operator round` bound to a thread of this project: none is
+     `MISSING`, one not enabled is `PAUSED`, and `OVERDUE` is a `docs/ops/status.txt` whose time
+     is older than twice the interval. In each of those no goal is being checked, and nothing
+     else will say so.
+   - **Runbook**, `OK` or `STALE`. `STALE` when its `Version:` differs from `shipped_sha` in
+     `docs/approval.json`, or a recipe is marked `unconfirmed`: name each.
 
 End with a one-line verdict: ready only when the host, toolchain, Codex, log, secret scan and
 merge guard checks are `OK` and every gate is `PASS` or `N/A`. Otherwise name the blockers and
-what each needs. Hygiene warnings never block; list them after the verdict.
+what each needs. Hygiene warnings and the operation lines never block; list them after the
+verdict, with what each needs: `/bstack:setup-ops` schedules the rounds, and `/bstack:operator
+round` brings the runbook up to date.
 
 ## Home
 Whether the overseer is still watching. Schedule, register and write nothing. Check, in order,

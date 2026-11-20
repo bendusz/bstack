@@ -10,6 +10,7 @@ logsh=$root/plugins/bstack/scripts/log.sh
 guard=$root/plugins/bstack/scripts/merge-guard.sh
 ledger=$root/plugins/bstack/scripts/ledger.sh
 hygiene=$root/plugins/bstack/scripts/hygiene.sh
+opsguard=$root/plugins/bstack/scripts/ops-guard.sh
 fails=0; n=0
 work=$(mktemp -d "${TMPDIR:-/tmp}/bstack-test.XXXXXX") || exit 2
 trap 'rm -rf "$work"' EXIT
@@ -170,6 +171,8 @@ git switch -q pm/S1-1-a; echo "- J1 label wording" > docs/acceptance-differences
 expect "guard: recording an accepted difference keeps the shas valid" 0 "" hook "$mg" "$M"
 git switch -q pm/S1-1-a; mkdir -p docs/board; echo "# Board status" > docs/board/20261118-151500-status.md; commit "board minutes"; git switch -q main
 expect "guard: board minutes keep the shas valid" 0 "" hook "$mg" "$M"
+git switch -q pm/S1-1-a; mkdir -p docs/ops; echo "OK" > docs/ops/status.txt; commit "ops status"; git switch -q main
+expect "guard: the operator's records keep the shas valid" 0 "" hook "$mg" "$M"
 expect "guard: a message naming another story is not an operand" 0 "" hook "$mg" "git merge -m \"pm/S1-2-b\" pm/S1-1-a"
 git branch -q pm/S1-2-b main
 expect "guard: two stories in one merge block" 2 "one story per merge" hook "$mg" "git merge pm/S1-1-a pm/S1-2-b"
@@ -340,10 +343,52 @@ lines"
 expect "log: an empty message is refused" 1 "empty" bash "$logsh" ""
 ( cd ../wt && bash "$logsh" "from a worktree" )
 expect "log: a worktree writes the main checkout's file" 0 "from a worktree" tail -1 docs/log.md
+expect "log: ops writes the operator's log" 0 "" bash "$logsh" "G1 missed, restarted" ops
+expect "log: the operator's log has its heading" 0 "# Operations log" head -1 docs/ops/log.md
+expect "log: the operator's line is not in the decision log" 1 "" grep -q "G1 missed" docs/log.md
+expect "log: another second word is refused" 1 "at most the word ops" bash "$logsh" "a line" other
 cd ../remote.git || exit 2
 expect "log: a bare repository is refused" 1 "main checkout" bash "$logsh" bare
 cd "$work" || exit 2
 expect "log: outside a repository is refused" 1 "not inside a git repository" bash "$logsh" nogit
+
+# --- ops-guard.sh ---
+# ohook <cwd> <command> [env...]: feed the ops guard a PreToolUse payload.
+ohook() {
+  local c=$1 s=$2; shift 2
+  s=${s//\\/\\\\}; s=${s//\"/\\\"}
+  printf '{"hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"%s","tool_input":{"command":"%s"}}' "$c" "$s" \
+    | env "$@" bash "$opsguard"
+}
+cd "$work" && git init -q -b main og && cd og || exit 2
+git config user.name test && git config user.email test@example.invalid
+echo hello > a.txt && commit init
+og=$PWD
+expect "ops guard: no charter, every command passes" 0 "" ohook "$og" "terraform apply"
+mkdir -p docs/ops src
+printf '# Charter\n\n## Free\n- `make restart`: staging only\n' > docs/ops/charter.md; commit "charter without Never"
+expect "ops guard: a charter with no Never section passes" 0 "" ohook "$og" "terraform apply"
+{
+  printf '\n## Never\n<!-- one per line -->\n'
+  printf -- '- `terraform +(apply|destroy)`: infrastructure is the user'"'"'s\n'
+  printf -- '- `[unclosed`: a pattern that does not compile\n'
+  printf -- '* `--live( |$)`: sends to real customers\n'
+  printf '\n## Notes\n- `git status`: listed after the section, so not refused\n'
+} >> docs/ops/charter.md; commit "charter with Never"
+expect "ops guard: a listed command is refused" 2 "under ## Never" ohook "$og" "terraform apply -auto-approve"
+expect "ops guard: the refusal names the pattern" 2 'terraform +(apply|destroy)' ohook "$og" "cd infra && terraform   destroy"
+expect "ops guard: a pattern after one that does not compile still refuses" 2 "--live" ohook "$og" "./bin/send-invoices --live"
+expect "ops guard: another command passes" 0 "" ohook "$og" "terraform plan"
+expect "ops guard: a line of ## Free is not a refusal" 0 "" ohook "$og" "make restart"
+expect "ops guard: a list after the section is not a refusal" 0 "" ohook "$og" "git status"
+expect "ops guard: a subdirectory answers to the same charter" 2 "under ## Never" ohook "$og/src" "terraform apply"
+expect "ops guard: a message quoting a refused command is refused" 2 "say it in other words" ohook "$og" "git commit -m \"asked the user to run terraform apply\""
+printf '# Charter\n' > docs/ops/charter.md
+expect "ops guard: an uncommitted edit of the charter changes nothing" 2 "under ## Never" ohook "$og" "terraform apply"
+git checkout -q -- docs/ops/charter.md
+expect "ops guard: setting the switch in a command is refused" 2 "the user's switch" ohook "$og" "BSTACK_NO_ENFORCE=1 terraform plan"
+expect "ops guard: the user's switch turns it off" 0 "" ohook "$og" "terraform apply" BSTACK_NO_ENFORCE=1
+cd "$work" || exit 2
 
 printf '%s checks, %s failed\n' "$n" "$fails"
 [ "$fails" -eq 0 ]

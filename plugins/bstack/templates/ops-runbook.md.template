@@ -1,0 +1,27 @@
+<!-- Write this file to: docs/ops/runbook.md. It is the operator's and says what is true now.
+     Every command is one read in the repository or confirmed by running it; anything else is
+     marked `unconfirmed`. Replace every comment as you fill this in. -->
+# <Product> runbook
+
+- Version: <the shipped_sha or commit these recipes were confirmed on>
+
+## Where it runs
+<each environment: hosts or URLs, how to reach it, where its logs and data live>
+
+## Start, stop, restart
+<the commands, and how to tell each one worked>
+
+## Look
+<what to read first when something seems wrong: status, logs, metrics, with their commands>
+
+## Jobs
+### <Job name> (goal <id>)
+<when it is due, the command, how long it takes, how to check it, whether a rerun is safe, and
+what it must never be run twice on>
+
+## Roll back
+<the rollback that was rehearsed, with its commands and how to check it, or "none rehearsed">
+
+## Known failures
+| symptom | cause | remedy | last seen |
+|---------|-------|--------|-----------|

@@ -1,0 +1,29 @@
+<!-- Write this file to: docs/ops/charter.md. It is the user's: the operator proposes a change
+     as a diff and never edits it unasked. Replace every comment as you fill this in. -->
+# <Product> operations charter
+
+- Environment: <where the operator works, such as staging or production, and how it reaches it>
+- Rounds: <every N minutes | on request>
+
+## Goals
+<!-- What must hold while the product runs, and what must get done. Each has a check a command
+     can decide. `every` is `round`, a time such as `daily 06:30` or `monthly 1st`, or `once`.
+     `critical` is `yes` for a goal whose miss is an incident. -->
+| id | goal | check | expect | every | critical |
+|----|------|-------|--------|-------|----------|
+| G1 | <what holds or gets done> | `<command>` | <what its output shows when the goal is met> | round | yes |
+
+## Free
+<!-- What the operator does without asking: a command, or a runbook recipe by its heading.
+     Looking (reading files, logs, status and metrics) is always free and is not listed. -->
+- <runbook `## Start, stop, restart`, on staging>
+
+## Ask first
+<!-- What waits for the user's yes each time; one yes covers one run. Say what it changes. -->
+- <runbook `### Send invoices`: mails real customers>
+
+## Never
+<!-- What no agent runs in this repository; the user runs it. One line each: an extended regular
+     expression in backticks, then why. The plugin's ops guard reads this section from the last
+     commit and refuses any Bash command that matches. -->
+- `<pattern>`: <why this is the user's alone>

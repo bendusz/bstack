@@ -1,8 +1,8 @@
 # bstack
 
 A Claude Code plugin marketplace: `plugins/bstack` (the T3-first project manager skill) and
-`plugins/poteto` (Lauren Tan's pstack skills, MIT). The plugin is prose and templates, five
-scripts and one hook.
+`plugins/poteto` (Lauren Tan's pstack skills, MIT). The plugin is prose and templates, six
+scripts and two hooks.
 
 ## Commands
 - Test: `bash .github/scripts/check.sh` (conventions, shellcheck when installed, script tests)
@@ -15,17 +15,22 @@ scripts and one hook.
   - Role skills make the session a role and hold its soul in their body. `pm` is the project
     manager, with ten `references/` (planning, scaffold, loop, roles, host, state, retro,
     skeleton, and acceptance and release, loaded only at their phase). `overseer` runs a home
-    repo over several product repositories.
-  - Setup skills prepare a folder and take on no role: `setup-project` and `setup-home`.
+    repo over several product repositories. `operator` runs and uses a product that is built,
+    inside the charter under its `docs/ops/`.
+  - Setup skills prepare a folder and take on no role: `setup-project`, `setup-home` and
+    `setup-ops`.
   - The other entry points are resume, doctor, retro, codex, skeleton and board. `board` keeps
     its chair and member souls in `skills/board/souls.md`, which the chair child reads.
-- `plugins/bstack/templates/`: the artifacts the PM creates in a project.
-- `plugins/bstack/scripts/log.sh`: appends a timestamped line to a project's `docs/log.md`.
+- `plugins/bstack/templates/`: the artifacts the skills create in a project or a home repo.
+- `plugins/bstack/scripts/log.sh`: appends a timestamped line to a project's `docs/log.md`, or
+  with `ops` to the operator's `docs/ops/log.md`.
 - `plugins/bstack/scripts/scan-secrets.sh`: blocks token formats in added lines; the project's
   pre-push hook and the PM's merge-time check.
 - `plugins/bstack/scripts/merge-guard.sh`, run by `hooks/hooks.json` on every Bash call: refuses
   a story merge without recorded gates, review, verifier and technical writer, or on a red
   integration gate.
+- `plugins/bstack/scripts/ops-guard.sh`, run by the same hook file: refuses a command that the
+  committed `docs/ops/charter.md` lists under `## Never`.
 - `plugins/bstack/scripts/ledger.sh` (a row per reviewed story) and `hygiene.sh`
   (`/bstack:doctor`'s machine checks).
 - `plugins/poteto/`: the ported pstack skills, with their LICENSE and attribution.
@@ -55,9 +60,9 @@ scripts and one hook.
   Code substitutes it. References and templates write `<plugin>`, which every skill defines.
 - Every model id in the plugin and the README is in `check.sh`'s pinned list: full ids such as
   `claude-opus-5-5`, never a moving alias.
-- The five scripts in `plugins/bstack/scripts/` are the only code in the plugin, each executable
-  with LF line endings, and `hooks/hooks.json` runs `merge-guard.sh`. Maintainer scripts live
-  under `.github/scripts/`.
+- The six scripts in `plugins/bstack/scripts/` are the only code in the plugin, each executable
+  with LF line endings, and `hooks/hooks.json` runs `merge-guard.sh` and `ops-guard.sh`.
+  Maintainer scripts live under `.github/scripts/`.
 - poteto keeps its MIT LICENSE and attribution, and `PORT.md` states its skill count.
 
 A reviewer still checks these by hand:
