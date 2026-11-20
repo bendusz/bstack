@@ -53,3 +53,4 @@ Agents give these reasons for skipping the walk-through. None of them holds:
   `cold-read-<k>`. Answer each `gap` from the code, or from the user where the code does not
   decide it, write the answer into the Design and commit. Read again under the next `k` until a
   read returns no gap, at most 3 reads; what is still open goes under Risks.
+- Last of all, write the shipped record (`state.md` `## Approval`), commit it and log it.

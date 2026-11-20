@@ -13,6 +13,10 @@ stands, and why things were decided. Everything else is branches, commits and tr
   where `plan_commit` is the commit holding the signed-off `docs/plan.md`. Commit it with a log
   line.
 - Nothing is built while the record is not `approved`.
+- When the product has shipped and its cold read is done (`acceptance.md` `## 4`), set `status`
+  to `shipped` and add `shipped_at`, the time you write it, and `shipped_sha`, the accepted
+  `rc_sha`; the other fields stay. A shipped record covers no new work: the next request is a
+  new plan (`planning.md` `## 1`).
 - On a material plan change, stop: show `git diff <plan_commit> -- docs/plan.md`, ask again, and
   write a new record only on a new approval.
 
@@ -72,8 +76,10 @@ sprint (`planning.md` `## 4`).
 ## Resume
 Read, in order: `docs/handoff.md` if present, then skip what its SKIP line lists; `docs/approval.json`; `git log --first-parent <integration branch>`; every
 story's `pm-exec`; `git worktree list --porcelain`; `t3_thread_read` of each thread a non-merged
-block records; the last ~20 lines of `docs/log.md`. Not approved means planning; approved with no
-stories means decomposition. Then re-enter each story from its `status` (steps per `loop.md`):
+block records; the last ~20 lines of `docs/log.md`. `pending` means planning; `approved` with no
+stories means decomposition. `shipped` means that work is over: say what shipped and when, and
+take a request as a new plan (`planning.md` `## 1`), never as a change to the shipped one. Then
+re-enter each story from its `status` (steps per `loop.md`):
 - `claimed`, no `thread`: dispatch step 2 or 3. Its fixed key returns the child of a lost response.
 - `claimed`, a `thread`, no `Tests:` line: the tests child. Finished: check its last result
   (step 2). Cancelled or interrupted: `t3_thread_send` it to continue, as step 3 resumes a build.

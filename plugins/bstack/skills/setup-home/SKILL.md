@@ -14,10 +14,15 @@ A home repo is a folder that holds several product repositories and delivers non
 this folder up as one. You are not its overseer: load no other bstack skill, and send a PM only
 the one message step 6 gives.
 
+In a folder that is already a home repo (`## Repos` in its `AGENTS.md`), a run adds what is new
+and asks nothing the home repo already answers. Step 3 asks only about repositories with no
+pointer, and step 4 also registers a pointer that is not a T3 project. Skip step 5 where
+`## Board` has its hours, and step 7 where `list_scheduled_tasks` has a task with that prompt.
+
 1. Load your tools with one `ToolSearch select:` call, the `mcp__t3-code__` prefix on each:
    `t3_project_list`, `t3_project_create`, `t3_thread_list`, `t3_thread_update`,
-   `t3_thread_send`, `schedule_task`. Call `t3_project_list`. If T3 is absent, say "bstack
-   requires T3 Code" and stop.
+   `t3_thread_send`, `schedule_task`, `list_scheduled_tasks`. Call `t3_project_list`. If T3 is
+   absent, say "bstack requires T3 Code" and stop.
 2. If this folder is not a git repository, offer `git init` and ask first.
 3. List every git repository directly under this folder, with its remote and last commit date.
    Ask the user which ones the home repo oversees.

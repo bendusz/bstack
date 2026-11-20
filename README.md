@@ -89,7 +89,8 @@ plugin), then run the two steps above. Projects keep working; see the 1.0.0 and 
 ## Use
 
 Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <request>`. On a
-project that is already signed off, `/bstack:pm` picks it up where it stands. To prepare a
+project that is already signed off, `/bstack:pm` picks it up where it stands, and on a product
+that has shipped it starts a new plan for the request. To prepare a
 repository before anything is planned, run `/bstack:setup-project`.
 
 1. **Plan.** The PM talks it through with you and writes `docs/plan.md`: scope, requirements and
@@ -110,7 +111,8 @@ repository before anything is planned, run `/bstack:setup-project`.
    ends with the journey gate, a retro that proposes `AGENTS.md` learnings as a diff, and a demo.
    A one-story fix skips the spec, sprints and retro.
 6. **Accept and release.** You walk the release candidate and record your acceptance; a
-   production release adds a binding go/no-go.
+   production release adds a binding go/no-go. Once it has shipped, the approval record says
+   `shipped`, and nothing more is built until a new plan is signed off.
 
 ## Roles
 

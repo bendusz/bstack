@@ -131,10 +131,12 @@ The user's scope is the ask: create it without a further question.
    the user's words exactly. Commit it. It is what a plan is signed off against.
 2. Send it to the product's PM (rule 1). To a new thread the message is
    `/bstack:pm bstack overseer: The user's request, word for word: "<request>". Say PLAN READY <plan commit> when the plan is ready for sign-off.`
-   To a PM that is already running, `t3_thread_send` the same text without `/bstack:pm`.
+   To a PM that is already running, `t3_thread_send` the same text without `/bstack:pm`. A
+   product whose `docs/approval.json` says `shipped` has no PM running: `t3_thread_launch` a new
+   `PM <repo>` thread for it, as rule 1 launches one.
 3. Log it. The next check reads the PM's answer; `t3_thread_wait` only while the user is waiting
    with you.
-4. Once the product's completion report says it shipped, `git rm` the request file.
+4. Once the product's `docs/approval.json` says `shipped`, `git rm` the request file.
 
 ## Check
 Note the time you start. For each repository under `## Repos`:

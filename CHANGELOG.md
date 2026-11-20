@@ -26,9 +26,24 @@ be set up only as a side effect of delivery. It is a major version because two s
   project a PM already manages, where its commit would have landed on top of an open release
   candidate. An empty repository gets neither `AGENTS.md` nor the bridge; the PM writes both
   after sign-off.
-- `/bstack:setup-home` is `/bstack:home setup`, and takes on no role.
+- `/bstack:setup-home` is `/bstack:home setup`, and takes on no role. Run again in a home repo
+  it adds what is new: it asks only about repositories that have no pointer, and leaves the
+  board hours and the scheduled check that are there.
 - The scaffold steps live in `references/scaffold.md`, which `/bstack:setup-project` and the PM
   after sign-off both follow. `planning.md` `## 5` keeps only what needs the plan.
+
+**A product that has shipped**
+- The approval record says so. After the cold read the PM sets `docs/approval.json` to `shipped`,
+  with the time and the accepted release candidate's sha. Before, the record stayed `approved`,
+  so a later request was resumed as a change to the plan that had shipped, under its old
+  sign-off.
+- A request to a shipped product is a new plan. The record goes back to `pending`, and
+  `docs/plan.md`, which is what shipped, is the base. `/bstack:resume` with no request says what
+  shipped and asks what comes next.
+- The overseer starts a new PM thread for a shipped product's next request; before, it sent the
+  request to the thread that ran the release. It removes a request file when the record says
+  `shipped`, no longer when a completion report exists, which is written before the release
+  candidate.
 
 **Checks**
 - `/bstack:doctor` reports a scheduled task that still runs `/bstack:home check` as `OUTDATED`.
@@ -43,7 +58,11 @@ Each of these did the right thing without the line written for it (`docs/evals.m
 - A PM loaded by `/bstack:doctor` on a project mid-sprint runs the readiness check only.
 - `/bstack:overseer` outside a home repo names `/bstack:setup-home` and sets nothing up, for
   `check` and for `new` alike.
-- `/bstack:pm` in a subdirectory of a home repo finds the home repo at the git root.
+- `/bstack:pm` in a subdirectory checks the git root for a home repo and for an approval
+  record.
+- A resume with a release candidate waiting for its walk-through reads the acceptance record,
+  cuts no second candidate and waits.
+- A new plan on a shipped product numbers its requirements and sprints on from the last.
 - `/bstack:overseer` with no argument shows what needs you and what was decided for you, and
   runs no check.
 
@@ -54,7 +73,9 @@ Each of these did the right thing without the line written for it (`docs/evals.m
   check. It changes the task's prompt and keeps its interval, thread and pause. Until
   then the task runs a skill that no longer exists and no product is checked. `/bstack:doctor`
   says so.
-- Projects need nothing.
+- Projects in flight need nothing. A product that shipped under an earlier version still says
+  `approved`: before its next request, tell its PM that it shipped, so it writes the shipped
+  record.
 
 ## 1.7.0 - 2026-11-19
 

@@ -57,6 +57,11 @@ A read of the shipped plan by an agent that opens no code, to list what a rebuil
 guess.
 _Avoid_: doc review
 
+**Shipped**:
+What a product is once its approval record says so: the user accepted the release candidate, it
+went out the way they asked, and the cold read is done. The next request is a new plan.
+_Avoid_: done, released, complete
+
 **Sprint boundary**:
 Everything between a sprint's last merge and the next sprint's first story: the journey gate, the
 cross-story review, the retro, the record and the demo.
