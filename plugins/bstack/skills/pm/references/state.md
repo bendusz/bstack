@@ -14,7 +14,7 @@ stands, and why things were decided. Everything else is branches, commits and tr
   line.
 - Nothing is built while the record is not `approved`.
 - When the product has shipped and its cold read is done (`acceptance.md` `## 4`), set `status`
-  to `shipped` and add `shipped_at`, the time you write it, and `shipped_sha`, the accepted
+  to `shipped` and add `shipped_at`, when it went out, and `shipped_sha`, the accepted
   `rc_sha`; the other fields stay. A shipped record covers no new work: the next request is a
   new plan (`planning.md` `## 1`).
 - On a material plan change, stop: show `git diff <plan_commit> -- docs/plan.md`, ask again, and

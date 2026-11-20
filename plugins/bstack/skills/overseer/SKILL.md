@@ -79,9 +79,10 @@ T3's tools load by name: one `ToolSearch select:` call, with the `mcp__t3-code__
    pending rules are the user's (rule 5).
 8. **The board reviews each product while it builds.** `AGENTS.md` `## Board` gives the hours. A
    product is due a `status` meeting when all three hold: those hours have passed, counted from
-   `approved_at` in `docs/approval.json` for the first meeting and from the last meeting's start
-   for each later one, held or failed (the later of the newest `docs/board/*-status.md` and the
-   `meeting` time in its `docs/watch.md` line); a story has merged since that meeting opened
+   `approved_at` in `docs/approval.json` for the first meeting after it and from the last
+   meeting's start for each later one, held or failed (the later of the newest
+   `docs/board/*-status.md` and the `meeting` time in its `docs/watch.md` line); a story has
+   merged since that meeting opened
    (since sign-off, for the first); and it has no `docs/completion-report.md` written since that sign-off. Send the PM
    `bstack overseer: board meeting. Merge nothing and leave the checked-out branch where it is until the verdict, or until <HH:MM, two hours from now> if none has come.`
    Then `t3_thread_launch` into the product's project, titled `board <repo>`, with

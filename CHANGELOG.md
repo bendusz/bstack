@@ -27,8 +27,8 @@ be set up only as a side effect of delivery. It is a major version because two s
   candidate. An empty repository gets neither `AGENTS.md` nor the bridge; the PM writes both
   after sign-off.
 - `/bstack:setup-home` is `/bstack:home setup`, and takes on no role. Run again in a home repo
-  it adds what is new: it asks only about repositories that have no pointer, and leaves the
-  board hours and the scheduled check that are there.
+  it adds what is new: it asks which repositories to oversee only of those that have no
+  pointer, and leaves the board hours and the scheduled check that are there.
 - The scaffold steps live in `references/scaffold.md`, which `/bstack:setup-project` and the PM
   after sign-off both follow. `planning.md` `## 5` keeps only what needs the plan.
 
@@ -43,7 +43,9 @@ be set up only as a side effect of delivery. It is a major version because two s
 - The overseer starts a new PM thread for a shipped product's next request; before, it sent the
   request to the thread that ran the release. It removes a request file when the record says
   `shipped`, no longer when a completion report exists, which is written before the release
-  candidate.
+  candidate. That report's table is headed `What was built`, no longer `What shipped`.
+- The board's hours for a product count from its newest sign-off, so the minutes of a plan that
+  shipped do not make a meeting due on the next one.
 
 **Checks**
 - `/bstack:doctor` reports a scheduled task that still runs `/bstack:home check` as `OUTDATED`.
@@ -63,6 +65,16 @@ Each of these did the right thing without the line written for it (`docs/evals.m
 - A resume with a release candidate waiting for its walk-through reads the acceptance record,
   cuts no second candidate and waits.
 - A new plan on a shipped product numbers its requirements and sprints on from the last.
+- A resume that finds the cold read cut off after a release finishes it, and takes a request
+  that came with it as a new plan once the shipped record is written.
+- A resume after the sign-off of a new plan decomposes its sprint, although the stories and the
+  handoff of the plan before are still there.
+- The overseer keeps a request filed after the product shipped, and sends a further message
+  about it to the PM thread already started for it.
+- The overseer signs off a plan on a shipped product although the lines kept from the shipped
+  plan do not trace to the new request, and accepts a sprint whose journey gate ran the earlier
+  journeys too.
+- `/bstack:setup-home` beside a paused `/bstack:home check` task schedules no second check.
 - `/bstack:overseer` with no argument shows what needs you and what was decided for you, and
   runs no check.
 
