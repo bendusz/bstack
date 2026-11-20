@@ -103,12 +103,11 @@ $t" ;; esac
 }
 add "$cwd"
 [ -z "${CLAUDE_PROJECT_DIR:-}" ] || add "$CLAUDE_PROJECT_DIR"
-# Every word of the command that names an existing path. Quotes, separators and `=` become
-# spaces, so `-chdir=infra`, `"cd" 'product'` and `(cd product; …)` each yield their path.
+# Every word of the command that names an existing path, however long the command. Quotes,
+# separators and `=` become line breaks, so `-chdir=infra`, `"cd" 'product'` and
+# `(cd product; …)` each yield their path. Each distinct word is looked at once.
 set -f
-n=0
-for w in $(printf '%s' "$cmd" | tr '\n\t;&|()<>"'"'"'=' '             '); do
-  n=$((n + 1)); [ "$n" -le 80 ] || break
+for w in $(tr ' \t;&|()<>"'"'"'=' '[\n*]' <<<"$cmd" | sort -u); do
   case $w in -*|*[\$\`*?]*) continue ;; esac
   case $w in /*) add "$w" ;; "~"/*) add "$HOME${w#\~}" ;; *) add "$cwd/$w" ;; esac
 done

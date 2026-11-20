@@ -416,6 +416,8 @@ expect "ops guard: a subshell that cds is seen" 2 "under ## Never" ohook "$work/
 expect "ops guard: a path into a product meets its charter" 2 "--live" ohook "$work/home" "product/a.txt --live"
 expect "ops guard: a path after = names the repository" 2 "under ## Never" ohook "$work/home" "env CONFIG=product/a.txt terraform apply"
 expect "ops guard: the home repo's own commands pass" 0 "" ohook "$work/home" "terraform apply"
+many=$(printf 'w%s ' $(seq 1 300))
+expect "ops guard: a path after hundreds of words is still seen" 2 "under ## Never" ohook "$work/home" "echo $many; cd product && terraform apply"
 expect "ops guard: a command that only names the product passes" 0 "" ohook "$work/home" "git -C product status"
 expect "ops guard: the session's project answers from another cwd" 2 "under ## Never" ohook "$work" "terraform apply" CLAUDE_PROJECT_DIR="$og"
 # taking a line out of ## Never is the user's commit
