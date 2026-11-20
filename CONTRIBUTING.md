@@ -1,6 +1,6 @@
 # Contributing to bstack
 
-bstack is prose and templates, five scripts in `plugins/bstack/scripts/` and one hook. A
+bstack is prose and templates, six scripts in `plugins/bstack/scripts/` and two hooks. A
 contribution is almost always a prose change: a reference, a skill, a role's soul or a template.
 
 ## Ground rules

@@ -69,19 +69,19 @@ Check, in order, each with its evidence:
    scripts outside a tracked `ops/pm/`, struck-through or superseded text left in the plan, spec
    or `AGENTS.md`. Each names its fix.
 9. **Operation**, only where `docs/ops/charter.md` exists. Load `list_scheduled_tasks` for it.
-   - **Ops guard**, `OK`, `NONE`, `OFF` or `BROKEN`. Feed it a payload it must refuse:
-     `printf '{"cwd":"%s","tool_input":{"command":"BSTACK_NO_ENFORCE=1 true"}}' "$PWD" | bash "${CLAUDE_PLUGIN_ROOT}/scripts/ops-guard.sh"`
-     Exit 2 naming "the user's switch" is `OK`. Exit 0 is `NONE`: the committed charter has no
-     `## Never` pattern, so nothing is refused. Anything else is `BROKEN`, with the output
-     quoted. `OFF` as in step 7.
+   - **Ops guard**, `OK`, `NONE`, `OFF` or `BROKEN`. From the main checkout,
+     `bash "${CLAUDE_PLUGIN_ROOT}/scripts/ops-guard.sh" --list` prints the patterns it reads
+     from the committed charter's `## Never`. `OK` names how many. `NONE` when it prints
+     nothing: no command is refused. `BROKEN` when it fails, or prints fewer patterns than the
+     section has list lines: quote the output. `OFF` as in step 7.
    - **Rounds**, `OK`, `MISSING`, `PAUSED`, `OVERDUE` or `ON REQUEST`. The charter's `Rounds:`
      gives the interval; `on request` is `ON REQUEST`. Otherwise `list_scheduled_tasks` holds a
      task with prompt `/bstack:operator round` bound to a thread of this project: none is
-     `MISSING`, one not enabled is `PAUSED`, and `OVERDUE` is a `docs/ops/status.txt` whose time
-     is older than twice the interval. In each of those no goal is being checked, and nothing
+     `MISSING`, one not enabled is `PAUSED`, and `OVERDUE` is a `docs/ops/status.txt` that is
+     absent or whose time is older than twice the interval. In each of those no goal is being checked, and nothing
      else will say so.
-   - **Runbook**, `OK` or `STALE`. `STALE` when its `Version:` differs from `shipped_sha` in
-     `docs/approval.json`, or a recipe is marked `unconfirmed`: name each.
+   - **Runbook**, `OK` or `STALE`. `STALE` when `docs/approval.json` has a `shipped_sha` and
+     the runbook's `Version:` differs from it, or a recipe is marked `unconfirmed`: name each.
 
 End with a one-line verdict: ready only when the host, toolchain, Codex, log, secret scan and
 merge guard checks are `OK` and every gate is `PASS` or `N/A`. Otherwise name the blockers and

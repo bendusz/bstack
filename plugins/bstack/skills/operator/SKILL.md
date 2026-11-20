@@ -1,7 +1,7 @@
 ---
 name: operator
 description: Use when the user invokes /bstack:operator or asks to run, operate or use a product that is already built, such as to do one of its routine jobs, to check whether it is up and meeting its goals, to look into something that went wrong while it ran, or to record what running it taught. Makes the session the operator of this repository; it runs and uses the product inside its charter and changes no code. Setting a repository up for operation is setup-ops's, and building or changing the product is the pm's.
-argument-hint: "[round | <request>]"
+argument-hint: "[round | schedule <minutes> | <request>]"
 ---
 
 If you were dispatched as a child agent (your task begins 'You are a bstack … child'), do not use this skill.
@@ -21,7 +21,7 @@ what operating can put right, and say plainly what it cannot. What a round teach
 the runbook, so the next session starts knowing it. A defect is a report, and its fix is a plan.
 
 ## Records
-All in `docs/ops/` at the repository's root, written first by `/bstack:setup-ops`:
+All in `docs/ops/` at the root of the main checkout, written first by `/bstack:setup-ops`:
 - `charter.md` is the user's: `## Goals`, each with the check that decides it, and what you may
   do, under `## Free` and `## Ask first`. `## Never` lists what the plugin's ops guard refuses
   for every agent in this repository; the user runs those, and only the user commits a change
@@ -32,18 +32,28 @@ All in `docs/ops/` at the repository's root, written first by `/bstack:setup-ops
   you ran that changed anything, each miss, and each ask with its answer. A quiet round logs
   nothing.
 - `status.txt`, one line: `<OK|DEGRADED|DOWN> <YYYY-MM-DD HH:MM> <version> <goals missed, or none>`.
-  The version is `shipped_sha` in `docs/approval.json`, or `HEAD` where there is no record.
+  The version is `shipped_sha` in `docs/approval.json`, or the runbook's `Version:` where the
+  record has none.
 
-Commit your own files and nothing else: `git add docs/ops`, then
-`git commit -m "ops: <what>" -- docs/ops`. Never `git add -A`.
+Commit your own files and nothing else. Of `runbook.md`, `log.md` and `status.txt`, `git add`
+the ones you changed and name the same paths in `git commit -m "ops: <what>" -- <paths>`. Never
+`git add -A` or `git add docs/ops`: an edit of the charter that is not committed is the user's
+to commit. A change to the charter that the user said yes to goes in a commit of its own.
 
 ## Start
 The message is `$ARGUMENTS`, or the request that selected this skill.
-- No `docs/ops/charter.md` at the root (`git rev-parse --show-toplevel`): the repository is not
-  set up for operation. Name `/bstack:setup-ops` and stop.
+- Work in the main checkout, where `log.sh` writes. In a linked worktree, name the main checkout
+  and stop.
+- No `docs/ops/charter.md` at its root: the repository is not set up for operation. Name
+  `/bstack:setup-ops` and stop.
 - Read the charter, the runbook, `status.txt` and the last 20 lines of `log.md`.
-- `round`: `## Round`. Any other message: `## A request`. None: say where the product stands
-  from `status.txt` and the log, and ask what the user wants.
+- `round`: `## Round`. `schedule <minutes>`: the rounds run in this thread. Load
+  `ToolSearch select:mcp__t3-code__schedule_task,mcp__t3-code__list_scheduled_tasks`; unless a
+  task with this prompt is bound here already, `schedule_task` with prompt
+  `/bstack:operator round`, `schedule` `{"type":"interval","everyMs":<ms>}`,
+  `bindToCurrentThread: true` and `freshSession: true`, and say when the first round runs.
+- Any other message: `## A request`. None: say where the product stands from `status.txt` and
+  the log, and ask what the user wants.
 
 ## Round
 1. **Goals.** Run the check of every goal that is due by its `every`. Each is met or missed, with

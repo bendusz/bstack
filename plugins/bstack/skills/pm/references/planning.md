@@ -7,8 +7,8 @@ plan, no spec and no sprints. Nothing is built before sign-off.
 ## 1. Ground
 - Not a git repository: offer `git init`, and ask first. Git is the record, so planning needs it.
 - Create `docs/approval.json` as `pending` per `state.md` `## Approval`; commit it with the first draft.
-- A product whose record says `shipped` starts its next plan here: set the record back to
-  `pending` from the template. `docs/plan.md` is what shipped and the base of the new plan: keep
+- A product whose record says `shipped` starts its next plan here: set `status` back to
+  `pending` and the three sign-off fields to `null`. `shipped_at` and `shipped_sha` stay. `docs/plan.md` is what shipped and the base of the new plan: keep
   what still holds, add the request to it, and put back the template sections it lacks.
 - Brownfield work: run one native Explore pass for the architecture, the conventions, the real
   test, lint and build commands, and where new code should go. Fold the answers into the plan's

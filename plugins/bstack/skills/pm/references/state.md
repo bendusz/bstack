@@ -11,10 +11,11 @@ stands, and why things were decided. Everything else is branches, commits and tr
   repo's overseer does (`planning.md` `## 4`), write
   `{"status":"approved","approved_at":"<YYYY-MM-DD HH:MM>","plan_commit":"<sha>","approved_by":"<user|overseer>"}`,
   where `plan_commit` is the commit holding the signed-off `docs/plan.md`. Commit it with a log
-  line.
+  line. A `shipped_at` and `shipped_sha` already in the record stay: they say what is in
+  operation until the next ship.
 - Nothing is built while the record is not `approved`.
 - When the product has shipped and its cold read is done (`acceptance.md` `## 4`), set `status`
-  to `shipped` and add `shipped_at`, when it went out, and `shipped_sha`, the accepted
+  to `shipped` and write `shipped_at`, when it went out, and `shipped_sha`, the accepted
   `rc_sha`; the other fields stay. A shipped record covers no new work: the next request is a
   new plan (`planning.md` `## 1`).
 - On a material plan change, stop: show `git diff <plan_commit> -- docs/plan.md`, ask again, and

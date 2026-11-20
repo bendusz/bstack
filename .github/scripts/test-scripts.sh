@@ -348,6 +348,7 @@ expect "log: an empty message is refused" 1 "empty" bash "$logsh" ""
 expect "log: a worktree writes the main checkout's file" 0 "from a worktree" tail -1 docs/log.md
 expect "log: ops writes the operator's log" 0 "" bash "$logsh" "G1 missed, restarted" ops
 expect "log: the operator's log has its heading" 0 "# Operations log" head -1 docs/ops/log.md
+expect "log: the operator's line is the last of its log" 0 "G1 missed, restarted" tail -1 docs/ops/log.md
 expect "log: the operator's line is not in the decision log" 1 "" grep -q "G1 missed" docs/log.md
 expect "log: another second word is refused" 1 "at most the word ops" bash "$logsh" "a line" other
 cd ../remote.git || exit 2
@@ -357,6 +358,7 @@ expect "log: outside a repository is refused" 1 "not inside a git repository" ba
 
 # --- ops-guard.sh ---
 # ohook <cwd> <command> [env...]: feed the ops guard a PreToolUse payload.
+ohook_from() { local from=$1; shift; ( cd "$from" && ohook "$@" ); }   # ohook, run from <dir>
 ohook() {
   local c=$1 s=$2; shift 2
   s=${s//\\/\\\\}; s=${s//\"/\\\"}
@@ -376,6 +378,8 @@ expect "ops guard: a charter with no Never section passes" 0 "" ohook "$og" "ter
   printf -- '- `terraform +(apply|destroy)`: infrastructure is the user'"'"'s\n'
   printf -- '- `[unclosed`: a pattern that does not compile\n'
   printf -- '* `--live( |$)`: sends to real customers\n'
+  printf -- '+ `kubectl +delete`: a plus as the list marker\n'
+  printf -- '- `` echo `date` > /srv ``: a pattern that holds a backtick\n'
   printf '\n## Notes\n- `git status`: listed after the section, so not refused\n'
 } >> docs/ops/charter.md; commit "charter with Never"
 expect "ops guard: a listed command is refused" 2 "under ## Never" ohook "$og" "terraform apply -auto-approve"
@@ -384,7 +388,18 @@ expect "ops guard: a pattern after one that does not compile still refuses" 2 "-
 expect "ops guard: another command passes" 0 "" ohook "$og" "terraform plan"
 expect "ops guard: a line of ## Free is not a refusal" 0 "" ohook "$og" "make restart"
 expect "ops guard: a list after the section is not a refusal" 0 "" ohook "$og" "git status"
-expect "ops guard: a subdirectory answers to the same charter" 2 "under ## Never" ohook "$og/src" "terraform apply"
+expect "ops guard: a subdirectory answers to the same charter" 2 "under ## Never" ohook_from "$work" "$og/src" "terraform apply"
+expect "ops guard: a + list marker is read" 2 "kubectl +delete" ohook "$og" "kubectl delete pod web"
+expect "ops guard: a pattern between double backticks is read" 2 "under ## Never" ohook "$og" "echo \`date\` > /srv"
+expect "ops guard: --list prints what HEAD enforces" 0 "kubectl +delete" bash "$opsguard" --list
+expect "ops guard: --list reads a file that is not committed yet" 0 "--live( |\$)" bash "$opsguard" --list docs/ops/charter.md
+oraw() { printf '{"cwd":"%s","tool_input":{"command":"%s"}}' "$1" "$2" | bash "$opsguard"; }   # JSON escapes as given
+long=$(printf 'echo %s\\n' $(seq 1 60000))
+expect "ops guard: a match on the first line of a very long command is refused" 2 "under ## Never" oraw "$og" "terraform apply\\n$long"
+expect "ops guard: input it cannot read is refused where a charter is" 2 "cannot read the hook input" \
+  bash -c "cd '$work' && printf '{\"cwd\":\"%s\", broken' '$og' | bash '$opsguard'"
+expect "ops guard: input it cannot read passes where no charter is" 0 "" \
+  bash -c "cd '$work' && printf '{\"cwd\":\"%s\", broken' '$work' | bash '$opsguard'"
 expect "ops guard: a message quoting a refused command is refused" 2 "say it in other words" ohook "$og" "git commit -m \"asked the user to run terraform apply\""
 printf '# Charter\n' > docs/ops/charter.md
 expect "ops guard: an uncommitted edit of the charter changes nothing" 2 "under ## Never" ohook "$og" "terraform apply"

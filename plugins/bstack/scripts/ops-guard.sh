@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # ops-guard.sh: Claude Code PreToolUse hook on Bash (hooks/hooks.json). In a repository set up
 # for operation it refuses a command the user has ruled out for every agent: docs/ops/charter.md,
-# read from HEAD, lists them under `## Never`, one list line each, as an extended regular
-# expression in backticks followed by the reason. A command that matches one is refused.
+# read from HEAD, lists them under `## Never`, one list line each (`-`, `*` or `+`), as an
+# extended regular expression in backticks followed by the reason. A pattern that holds a
+# backtick is written between double backticks. A command that matches one is refused.
+# `ops-guard.sh --list [file]` prints the patterns it reads, from that file or from HEAD, so a
+# setup or a doctor can see what is enforced.
 #   - Every repository the call may act in answers: the one its cwd is in, the one the session
 #     was started in (CLAUDE_PROJECT_DIR), and the one holding any path the command names, so
 #     `cd product && …` and `product/bin/…` from a home repo meet the product's charter.
@@ -11,7 +14,8 @@
 #   - A `git commit` is refused while the charter in the index or the work tree lacks a pattern
 #     that HEAD has: only the user commits a change that takes a line out of `## Never`.
 #   - The whole command text is matched, so a message that quotes a refused command is refused
-#     too, and the refusal says so. A pattern grep cannot compile matches nothing.
+#     too, and the refusal says so. A pattern grep cannot compile matches nothing. grep reads
+#     the command from a here-string: in a pipe, a writer cut short would decide the status.
 # It guards against mistakes, not an adversary with a shell: a command that reaches a repository
 # through a variable, or moves HEAD to a commit with another charter, is not seen.
 # Exit 0 allows, exit 2 blocks with the reason on stderr. Bash 3.2 compatible.
@@ -20,7 +24,6 @@ set -uo pipefail
 CHARTER=docs/ops/charter.md
 
 block() { printf 'bstack ops guard: %s\n' "$1" >&2; exit 2; }
-input=$(cat)
 
 field() { # field <key>...: a string at that path in the hook input, else empty
   if command -v jq >/dev/null 2>&1; then
@@ -40,17 +43,39 @@ patterns() { # stdin: a charter. stdout: the patterns of its ## Never section, o
   awk '
     /^## Never[[:space:]]*$/ { f = 1; next }
     /^## / { f = 0 }
-    f && /^[[:space:]]*[-*][[:space:]]*`/ {
-      s = $0; sub(/^[^`]*`/, "", s); i = index(s, "`")
-      if (i > 1) print substr(s, 1, i - 1)
+    f && /^[[:space:]]*[-*+][[:space:]]*`/ {
+      s = $0; sub(/^[[:space:]]*[-*+][[:space:]]*/, "", s)
+      d = (substr(s, 1, 2) == "``") ? "``" : "`"
+      s = substr(s, length(d) + 1); i = index(s, d)
+      if (i > 1) {
+        q = substr(s, 1, i - 1)
+        if (d == "``") { sub(/^ /, "", q); sub(/ $/, "", q) }
+        if (q != "") print q
+      }
     }'
 }
 never() { git -C "$1" show "HEAD:$CHARTER" 2>/dev/null | patterns; }   # never <repository root>
 
+if [ "${1:-}" = --list ]; then
+  if [ -n "${2:-}" ]; then patterns < "$2"; else never "$PWD"; fi
+  exit 0
+fi
+
+input=$(cat)
 if ! cmd=$(field tool_input command); then
-  # No JSON reader. Refuse only where there is something to guard.
-  [ -n "$(never "$PWD")" ] || exit 0
-  block "cannot read the hook input: install jq, python3 or node"
+  # The input cannot be read: no jq, python3 or node, or it is not JSON. Refuse only where
+  # there is something to guard, taking the cwd from the raw text.
+  [ "${BSTACK_NO_ENFORCE:-}" = 1 ] && exit 0
+  raw=$(sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' <<EOF
+$input
+EOF
+)
+  raw=${raw%%$'\n'*}
+  for d in "$raw" "$PWD" "${CLAUDE_PROJECT_DIR:-}"; do
+    [ -n "$d" ] || continue
+    [ -z "$(never "$d")" ] || block "cannot read the hook input: it needs jq, python3 or node"
+  done
+  exit 0
 fi
 cwd=$(field cwd); [ -n "$cwd" ] || cwd=$PWD
 
@@ -112,11 +137,11 @@ while IFS= read -r r; do
   while IFS= read -r pat; do
     [ -n "$pat" ] || continue
     if [ "$commit" = 1 ]; then
-      if ! printf '%s\n' "$staged" | grep -Fxq -e "$pat" || ! printf '%s\n' "$tree" | grep -Fxq -e "$pat"; then
+      if ! grep -Fxq -e "$pat" <<<"$staged" || ! grep -Fxq -e "$pat" <<<"$tree"; then
         block "refused: the charter to be committed lacks \`$pat\`, which is under ## Never in $r/$CHARTER at HEAD. Only the user commits a change that takes a line out of ## Never."
       fi
     fi
-    if printf '%s\n' "$cmd" | grep -Eq -e "$pat" 2>/dev/null; then
+    if grep -Eq -e "$pat" <<<"$cmd" 2>/dev/null; then
       block "refused: \`$pat\` is under ## Never in $r/$CHARTER. No agent runs this here; the user does. Do not rephrase or wrap it to get past this. A command that only mentions it, such as a log line or a commit message, is refused too: say it in other words."
     fi
   done <<EOF

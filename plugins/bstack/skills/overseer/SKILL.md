@@ -153,8 +153,9 @@ exactly `OPS <repo>`. One without the charter is not set up for operation: say t
   written, with a push notification for an `INCIDENT`. The user's word to fix it is a request
   for the product (`## A request for a product`). Any other question is yours (rule 6), with
   the charter and the runbook in place of the plan.
-- A `docs/ops/status.txt` older than twice the charter's `Rounds:` means the rounds have
-  stopped: its line says `ops stale`, and that goes under `Needs you`.
+- With `Rounds:` on a schedule, a `docs/ops/status.txt` that is absent or older than twice the
+  interval means the rounds are not running: its line says `ops stale`, and that goes under
+  `Needs you`.
 
 ## Check
 Note the time you start. For each repository under `## Repos`:

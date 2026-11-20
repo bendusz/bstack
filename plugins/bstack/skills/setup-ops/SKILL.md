@@ -18,7 +18,7 @@ Where `docs/ops/charter.md` already exists, a run adds what is absent and asks n
 charter already answers.
 
 1. Load your tools with one `ToolSearch select:` call, the `mcp__t3-code__` prefix on each:
-   `orchestrator_capabilities`, `schedule_task`, `list_scheduled_tasks`, `t3_thread_update`.
+   `orchestrator_capabilities`, `list_scheduled_tasks`, `t3_thread_list`, `t3_thread_launch`.
    Call `orchestrator_capabilities`. Without T3 Code, say "bstack requires T3 Code" and stop.
 2. Find the root with `git rev-parse --show-toplevel`; everything below is on the root. In a
    subdirectory, name the root and ask before going on. Stop, writing nothing, where there is
@@ -50,17 +50,21 @@ charter already answers.
    - `docs/ops/runbook.md` from `<plugin>/templates/ops-runbook.md.template`. Every command in
      it is one you read in the repository. Mark `unconfirmed` any you could not find there, and
      never invent one.
-   Replace every template comment. Test each `## Never` pattern against the command it is
-   meant to stop and against one it must let through:
-   `printf '%s\n' '<command>' | grep -Eq -e '<pattern>'`.
-6. Show the user both files. The charter is theirs: commit only on their "approved", with
-   `git add docs/ops` and `git commit -m "ops: charter and runbook" -- docs/ops`. From that
+   Replace every template comment. Then check what the guard will read:
+   `bash "${CLAUDE_PLUGIN_ROOT}/scripts/ops-guard.sh" --list docs/ops/charter.md` prints one
+   pattern a line, and must print every one you wrote. Test each printed pattern against the
+   command it is meant to stop and against one it must let through:
+   `grep -Eq -e '<pattern>' <<<'<command>'`.
+6. Show the user both files. The charter is theirs: commit only on their "approved", and only these
+   two: `git add docs/ops/charter.md docs/ops/runbook.md`, then
+   `git commit -m "ops: charter and runbook" -- docs/ops/charter.md docs/ops/runbook.md`. From that
    commit on, the plugin's ops guard refuses the `## Never` commands for every agent here, and
    any commit of theirs that takes a line out of `## Never`.
-7. With rounds on a schedule, and no task in `list_scheduled_tasks` that has this prompt and is
-   bound to a thread of this project: `schedule_task` with prompt `/bstack:operator round`,
-   `schedule` `{"type":"interval","everyMs":<ms>}`, `bindToCurrentThread: true` and
-   `freshSession: true`, so each round starts clean and reads the records. Title this thread
-   `OPS <repo>` with `t3_thread_update`, so a home repo's overseer finds it.
+7. With rounds on a schedule, and no task in `list_scheduled_tasks` with prompt
+   `/bstack:operator round` bound to a thread of this project: the rounds get a thread of their
+   own. `t3_thread_launch` one into this project, titled `OPS <repo>`, with the message
+   `/bstack:operator schedule <minutes>`; the operator schedules its rounds there, and a home
+   repo's overseer finds it by that title. Never bind the rounds to this thread or rename it:
+   it may be the PM's.
 8. Tell the user what you wrote, which recipes are `unconfirmed`, when the first round runs,
    and that `/bstack:operator` is how they work with the product from here.

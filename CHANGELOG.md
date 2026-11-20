@@ -40,7 +40,8 @@ major version because two skill names go.
   with the time and the accepted release candidate's sha. Before, the record stayed `approved`,
   so a later request was resumed as a change to the plan that had shipped, under its old
   sign-off.
-- A request to a shipped product is a new plan. The record goes back to `pending`, and
+- A request to a shipped product is a new plan. The record goes back to `pending` and keeps
+  `shipped_at` and `shipped_sha`, which say what is in operation until the next ship;
   `docs/plan.md`, which is what shipped, is the base. `/bstack:resume` with no request says what
   shipped and asks what comes next.
 - The overseer starts a new PM thread for a shipped product's next request; before, it sent the
@@ -56,13 +57,16 @@ major version because two skill names go.
   line of status. It changes no code: a defect is a `FIX NEEDED` line, and a critical goal it
   cannot restore is an `INCIDENT`. What a round teaches goes into the runbook.
 - `/bstack:setup-ops` reads how the product is run from the repository, agrees the goals and the
-  operator's limits with the user, writes `docs/ops/charter.md` and `docs/ops/runbook.md`, and
-  schedules the rounds. It operates nothing, and commits the charter only on the user's word.
+  operator's limits with the user, and writes `docs/ops/charter.md` and `docs/ops/runbook.md`.
+  It operates nothing and commits the two files only on the user's word. The rounds get a
+  thread of their own, `OPS <repo>`, where `/bstack:operator schedule <minutes>` schedules
+  them; setup never binds them to the thread it runs in, which may be the PM's.
 - The charter is the user's: goals with their checks, what the operator does unasked, what waits
   for a yes, and what no agent runs. The ops guard, a second hook (`ops-guard.sh`), reads the
   last list from the committed charter and refuses any command that matches it, for every agent
   in that repository and for a command that reaches into it from another folder. It refuses an
   agent's commit that takes a line out of that list, which only the user commits.
+  `ops-guard.sh --list` prints the patterns it reads, which setup and `/bstack:doctor` use.
 - Under a home repo the overseer sends a request to run or use a product to its `OPS <repo>`
   thread and no longer to a PM, reads each operator's status and messages at the check, lists
   every `INCIDENT`, `FIX NEEDED` and ask-first question under `Needs you`, and shows `ops` in
@@ -113,6 +117,10 @@ Each of these did the right thing without the line written for it (`docs/evals.m
 - The operator, after a new version shipped, reads what changed before it runs a job whose flag
   now means something else.
 - The PM, when a product ships, names `/bstack:setup-ops`.
+- The operator checks a goal again that the last round left missed, although it is not due,
+  and does not write `OK` over it.
+- The overseer sends the user's yes to an operator's question to the operator's thread, in
+  quotation marks, and the fix they ask for to a PM.
 - `/bstack:overseer` with no argument shows what needs you and what was decided for you, and
   runs no check.
 

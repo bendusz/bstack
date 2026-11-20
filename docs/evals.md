@@ -96,7 +96,12 @@ rule is a second situation: the rounds on time, the runbook a version behind and
 `unconfirmed`. Four operator situations were also run at the wording as it stands, once each,
 and passed: the production app down at night with a one-line fix in view, a job under
 `## Ask first` that the user approved a month earlier, a request for a command under `## Never`,
-and a job whose flag changed meaning in a version that had just shipped.
+and a job whose flag changed meaning in a version that had just shipped. Three more ran once
+each and passed: setup at the user's "approved" in a thread titled `PM invoicer` (two files
+committed, an `OPS invoicer` thread launched, nothing bound or renamed), `/bstack:operator
+schedule 30` in that thread, and a request with the user's own edit of the charter uncommitted
+(the commit named the operator's three files). S63 was run once more after the record came to
+keep `shipped_at` and `shipped_sha` through `pending`, and passed with both kept.
 
 The merge guard and the ops guard are also tested mechanically: `.github/scripts/test-scripts.sh` feeds each hook real
 PreToolUse payloads against throwaway repositories.
