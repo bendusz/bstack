@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. Entries before 0.30.0 are in git
 (tag `v0.29.4`).
 
+## 2.0.1 - 2026-11-21
+
+- A child no longer deletes its scratch files. Every dispatch now says never to run `rm -rf`
+  and to leave scratch in a temp directory. A Codex child stops at that command for the user's
+  approval, in a full-access thread too, and nothing wakes the PM while it waits: a review sat
+  for three hours on the removal of its own temp folder.
+
 ## 2.0.0 - 2026-11-20
 
 Splits "who the agent is" from "prepare this folder", and adds the role that takes over once a
