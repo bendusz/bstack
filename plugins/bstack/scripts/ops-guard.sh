@@ -173,9 +173,10 @@ EOF
 case $cmd in *BSTACK_NO_ENFORCE=*) block "BSTACK_NO_ENFORCE is the user's switch; never set it in a command" ;; esac
 [ "${BSTACK_NO_ENFORCE:-}" = 1 ] && exit 0
 
-# `git … commit` as words of one command: `git log --committer=…` and `HEAD^{commit}` are not it.
+# Any `git` followed by `commit` counts as a commit, however it is quoted or split: a wrong yes
+# costs one refusal. Only `--committer` and `^{commit}`, which read, are taken out first.
 commit=0
-grep -Eq '(^|[^[:alnum:]_.-])git[[:space:]]([^;&|]*[[:space:]])?commit([[:space:];&|)]|$)' <<<"$cmd" && commit=1
+case $(sed -e 's/--committer//g' -e 's/\^{commit}//g' <<<"$cmd") in *git*commit*) commit=1 ;; esac
 while IFS= read -r r; do
   [ -n "$r" ] || continue
   pats=$(never "$r"); [ -n "$pats" ] || continue

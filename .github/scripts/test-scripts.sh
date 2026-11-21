@@ -453,6 +453,7 @@ cd "$og" || exit 2
 grep -v 'terraform' docs/ops/charter.md > c.tmp && mv c.tmp docs/ops/charter.md
 expect "ops guard: a commit of a charter that lost a line is refused" 2 "Only the user commits" ohook "$og" "git commit -am \"ops: charter\""
 expect "ops guard: git -C … commit is a commit" 2 "Only the user commits" ohook "$work" "git -C og commit -am x"
+expect "ops guard: a commit behind a quoted option is a commit" 2 "Only the user commits" ohook "$og" "git -c core.editor=\"a|b\" 'commit' -am x"
 expect "ops guard: git log --committer is not a commit" 0 "" ohook "$og" "git log --committer=Ben"
 expect "ops guard: HEAD^{commit} is not a commit" 0 "" ohook "$og" "git rev-parse HEAD^{commit}"
 git add docs/ops/charter.md && git checkout -q HEAD -- a.txt
