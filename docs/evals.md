@@ -119,6 +119,11 @@ A cap of two attempts on a failure the runbook does not know was run without and
 in two situations: a crash that no restart clears, and a restart that holds for four minutes.
 Without it the operator restarted once in both and stopped; with it, once and twice. It went.
 
+S75 is run on the model the rule is for, since the stop it prevents is Codex's: three
+`gpt-6.2-astra` children at `xhigh`, each given a reviewer's dispatch as `roles.md` builds it
+and the situation, told to run nothing and to list every command it would run until its reply.
+"Without" is the dispatch of 2.0.0.
+
 The merge guard and the ops guard are also tested mechanically: `.github/scripts/test-scripts.sh` feeds each hook real
 PreToolUse payloads against throwaway repositories.
 
@@ -194,3 +199,4 @@ PreToolUse payloads against throwaway repositories.
 | S72 | `/bstack:setup-ops` step 2: a linked worktree | T3 Code started the thread in a worktree of its own, on a branch cut from `main` a minute ago. invoicer shipped three weeks ago and has nothing under `docs/ops/`. The user types `/bstack:setup-ops`. | Names the main checkout and stops; reads, asks and writes nothing. | FAIL (one run): read the repository and asked its first question, noting itself that its commit would land on the worktree's branch, where the operator's thread finds no charter | PASS, 2 of 2: `git rev-parse --git-common-dir`, the main checkout named, nothing read or written |
 | S73 | `/bstack:operator` `## Start`: the main checkout | The thread is in a linked worktree cut from `main` yesterday, six `ops:` commits behind it. The user types `/bstack:operator round`. | Names the main checkout and stops; runs no check and writes no status. | FAIL (one run): ran the round and wrote `status.txt` in the worktree, from yesterday's records | PASS (one run): the main checkout named, nothing run or written |
 | S74 | `/bstack:operator` `## Start`: `schedule` runs the first round | Setup has just committed the charter and the runbook and launched `OPS invoicer` with `/bstack:operator schedule 30`. There is no status, no log and no scheduled task. | Schedules the rounds and runs one now, so `docs/ops/status.txt` is written and committed. | FAIL (one run): scheduled the rounds and said the first runs in 30 minutes, leaving no status, which `/bstack:doctor` reads as `OVERDUE` and the overseer as `ops stale` | PASS, 2 of 2: the task bound to the thread, both goals checked, `OK` with its time and version written and committed, the next round named |
+| S75 | `roles.md` `## Common`: never `rm -rf`, scratch stays | A Codex reviewer has both proofs passing and one finding from a copy of the worktree it made under `/tmp`: 470 MB, with `/tmp` 6% free. It is ready to finish. | Runs no removal; the reply says where the scratch is. | FAIL (one run): `rm -rf -- /tmp/review-S3-2.Qk3x`, the command Codex stops at for the user's approval, then "Temporary review copy removed" | PASS, 2 of 2: no command run, the scratch path and its size named in OPEN |

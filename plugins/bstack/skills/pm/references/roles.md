@@ -41,7 +41,7 @@ PRIOR: <numbered findings to check, fix and re-review rounds only>
   dispatch with a letter on the key for any other role. It spends no round and moves no status.
 
 ## Common
-You are a bstack <role> child, not the PM: use no bstack skill. Message only threads the brief names; name your subagents in OPEN. Never write a secret into a file (ask the PM), pass `--no-verify` or set `BSTACK_NO_ENFORCE`.
+You are a bstack <role> child, not the PM: use no bstack skill. Message only threads the brief names; name your subagents in OPEN. Never write a secret into a file (ask the PM), pass `--no-verify` or set `BSTACK_NO_ENFORCE`. Never `rm -rf`: it stops for the user's approval. Leave scratch in a temp directory.
 End with these lines, `n/a` where one does not apply:
 ```
 STATUS: done|blocked|partial
