@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # log.sh "<message>": append "YYYY-MM-DD HH:MM  <message>" to the main checkout's docs/log.md.
+# log.sh "<message>" ops: the same line, to docs/ops/log.md, the operator's log.
 # Rejects an empty, multi-line or over-100-character message. Never stages or commits.
 set -euo pipefail
 die() { printf 'log.sh: %s\n' "$1" >&2; exit 1; }
-[ "$#" -eq 1 ] || die "expected exactly one argument, the message (got $#)"
+[ "$#" -eq 1 ] || { [ "$#" -eq 2 ] && [ "$2" = ops ]; } \
+  || die "expected the message, and after it at most the word ops (got $#)"
 msg=$1
 [ -n "$msg" ] || die "message is empty"
 case $msg in *$'\n'*) die "message contains a newline" ;; esac
@@ -24,8 +26,9 @@ common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) \
 top=$(git -C "$common" rev-parse --show-toplevel 2>/dev/null) || top=$(dirname "$common")
 [ "$(git -C "$top" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" = "$common" ] \
   || die "cannot find the main checkout of $common"
-log=$top/docs/log.md
+log=$top/docs/log.md; head='# Decision log'
+[ "$#" -eq 1 ] || { log=$top/docs/ops/log.md; head='# Operations log'; }
 ts=$(date '+%Y-%m-%d %H:%M') && [ -n "$ts" ] || die "could not read the date"
 mkdir -p "$(dirname "$log")" 2>/dev/null || die "cannot create $(dirname "$log")"
-[ -f "$log" ] || { printf '# Decision log\n' > "$log"; } 2>/dev/null || die "cannot create $log"
+[ -f "$log" ] || { printf '%s\n' "$head" > "$log"; } 2>/dev/null || die "cannot create $log"
 { printf '%s  %s\n' "$ts" "$msg" >> "$log"; } 2>/dev/null || die "cannot write to $log"

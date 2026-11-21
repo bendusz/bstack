@@ -10,6 +10,7 @@ logsh=$root/plugins/bstack/scripts/log.sh
 guard=$root/plugins/bstack/scripts/merge-guard.sh
 ledger=$root/plugins/bstack/scripts/ledger.sh
 hygiene=$root/plugins/bstack/scripts/hygiene.sh
+opsguard=$root/plugins/bstack/scripts/ops-guard.sh
 fails=0; n=0
 work=$(mktemp -d "${TMPDIR:-/tmp}/bstack-test.XXXXXX") || exit 2
 trap 'rm -rf "$work"' EXIT
@@ -170,6 +171,18 @@ git switch -q pm/S1-1-a; echo "- J1 label wording" > docs/acceptance-differences
 expect "guard: recording an accepted difference keeps the shas valid" 0 "" hook "$mg" "$M"
 git switch -q pm/S1-1-a; mkdir -p docs/board; echo "# Board status" > docs/board/20261118-151500-status.md; commit "board minutes"; git switch -q main
 expect "guard: board minutes keep the shas valid" 0 "" hook "$mg" "$M"
+git switch -q pm/S1-1-a; mkdir -p docs/ops; echo "OK" > docs/ops/status.txt
+echo "# Operations log" > docs/ops/log.md; echo "# Runbook" > docs/ops/runbook.md; commit "ops records"; git switch -q main
+expect "guard: the operator's records keep the shas valid" 0 "" hook "$mg" "$M"
+git switch -q pm/S1-1-a; echo "# Charter" > docs/ops/charter.md; commit "charter on a story branch"; git switch -q main
+expect "guard: a charter changed on the story branch voids the shas" 2 "change docs/ops/charter.md" hook "$mg" "$M"
+headc=$(git rev-parse pm/S1-1-a)
+git switch -q pm/S1-1-a; git mv docs/ops/charter.md docs/handoff.md; commit "charter renamed to a record"
+headr=$(git rev-parse HEAD); git switch -q main
+exec_line "PASS $headc" "PASS $headc" "PASS $headr" "PASS $headr"
+expect "guard: a charter renamed to a record still voids the gates" 2 "change docs/ops/charter.md" hook "$mg" "$M"
+exec_line "PASS $head1" "PASS $head1"
+git switch -q pm/S1-1-a; git reset -q --hard HEAD~2; git switch -q main
 expect "guard: a message naming another story is not an operand" 0 "" hook "$mg" "git merge -m \"pm/S1-2-b\" pm/S1-1-a"
 git branch -q pm/S1-2-b main
 expect "guard: two stories in one merge block" 2 "one story per merge" hook "$mg" "git merge pm/S1-1-a pm/S1-2-b"
@@ -340,10 +353,119 @@ lines"
 expect "log: an empty message is refused" 1 "empty" bash "$logsh" ""
 ( cd ../wt && bash "$logsh" "from a worktree" )
 expect "log: a worktree writes the main checkout's file" 0 "from a worktree" tail -1 docs/log.md
+expect "log: ops writes the operator's log" 0 "" bash "$logsh" "G1 missed, restarted" ops
+expect "log: the operator's log has its heading" 0 "# Operations log" head -1 docs/ops/log.md
+expect "log: the operator's line is the last of its log" 0 "G1 missed, restarted" tail -1 docs/ops/log.md
+expect "log: the operator's line is not in the decision log" 1 "" grep -q "G1 missed" docs/log.md
+expect "log: another second word is refused" 1 "at most the word ops" bash "$logsh" "a line" other
 cd ../remote.git || exit 2
 expect "log: a bare repository is refused" 1 "main checkout" bash "$logsh" bare
 cd "$work" || exit 2
 expect "log: outside a repository is refused" 1 "not inside a git repository" bash "$logsh" nogit
+
+# --- ops-guard.sh ---
+# ohook <cwd> <command> [env...]: feed the ops guard a PreToolUse payload.
+ohook_from() { local from=$1; shift; ( cd "$from" && ohook "$@" ); }   # ohook, run from <dir>
+ohook() {
+  local c=$1 s=$2; shift 2
+  s=${s//\\/\\\\}; s=${s//\"/\\\"}
+  printf '{"hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"%s","tool_input":{"command":"%s"}}' "$c" "$s" \
+    | env "$@" bash "$opsguard"
+}
+cd "$work" && git init -q -b main og && cd og || exit 2
+git config user.name test && git config user.email test@example.invalid
+echo hello > a.txt && commit init
+og=$PWD
+expect "ops guard: no charter, every command passes" 0 "" ohook "$og" "terraform apply"
+mkdir -p docs/ops src
+printf '# Charter\n\n## Free\n- `make restart`: staging only\n' > docs/ops/charter.md; commit "charter without Never"
+expect "ops guard: a charter with no Never section passes" 0 "" ohook "$og" "terraform apply"
+{
+  printf '\n## Never\n<!-- one per line -->\n'
+  printf -- '- `terraform +(apply|destroy)`: infrastructure is the user'"'"'s\n'
+  printf -- '- `[unclosed`: a pattern that does not compile\n'
+  printf -- '* `--live( |$)`: sends to real customers\n'
+  printf -- '+ `kubectl +delete`: a plus as the list marker\n'
+  printf -- '- `` echo `date` > /srv ``: a pattern that holds a backtick\n'
+  printf '\n## Notes\n- `git status`: listed after the section, so not refused\n'
+} >> docs/ops/charter.md; commit "charter with Never"
+expect "ops guard: a listed command is refused" 2 "under ## Never" ohook "$og" "terraform apply -auto-approve"
+expect "ops guard: the refusal names the pattern" 2 'terraform +(apply|destroy)' ohook "$og" "cd infra && terraform   destroy"
+expect "ops guard: a pattern after one that does not compile still refuses" 2 "--live" ohook "$og" "./bin/send-invoices --live"
+expect "ops guard: another command passes" 0 "" ohook "$og" "terraform plan"
+expect "ops guard: a line of ## Free is not a refusal" 0 "" ohook "$og" "make restart"
+expect "ops guard: a list after the section is not a refusal" 0 "" ohook "$og" "git status"
+expect "ops guard: a subdirectory answers to the same charter" 2 "under ## Never" ohook_from "$work" "$og/src" "terraform apply"
+expect "ops guard: a + list marker is read" 2 "kubectl +delete" ohook "$og" "kubectl delete pod web"
+expect "ops guard: a pattern between double backticks is read" 2 "under ## Never" ohook "$og" "echo \`date\` > /srv"
+expect "ops guard: --list prints what HEAD enforces" 1 "kubectl +delete" bash "$opsguard" --list
+expect "ops guard: --list names a pattern that does not compile" 1 'cannot compile `[unclosed`' bash "$opsguard" --list
+expect "ops guard: --list leaves that pattern out of what it prints" 1 "" bash -c "bash '$opsguard' --list 2>/dev/null | grep -F unclosed"
+printf '##\tNever ##\n- `only-in-the-file`\n##\tFree\n- `free-line`\n\n## Never\n* `second-section`\n# Appendix\n- `appendix-line`\n' > "$work/draft.md"
+expect "ops guard: --list reads the file it is given, and a section ends at a heading of its level or above" 0 "" \
+  bash -c "[ \"\$(bash '$opsguard' --list '$work/draft.md' | tr '\n' ,)\" = only-in-the-file,second-section, ]"
+expect "ops guard: --list fails on a file it cannot read" 1 "cannot read" bash "$opsguard" --list "$work/absent.md"
+oraw() { printf '{"cwd":"%s","tool_input":{"command":"%s"}}' "$1" "$2" | bash "$opsguard"; }   # JSON escapes as given
+long=$(printf 'echo %s\\n' $(seq 1 60000))
+expect "ops guard: a match on the first line of a very long command is refused" 2 "under ## Never" oraw "$og" "terraform apply\\n$long"
+expect "ops guard: input it cannot read is refused where a charter is" 2 "cannot read the hook input" \
+  bash -c "cd '$work' && printf '{\"cwd\":\"%s\", broken' '$og' | bash '$opsguard'"
+expect "ops guard: input it cannot read passes where no charter is" 0 "" \
+  bash -c "cd '$work' && printf '{\"cwd\":\"%s\", broken' '$work' | bash '$opsguard'"
+expect "ops guard: a message quoting a refused command is refused" 2 "say it in other words" ohook "$og" "git commit -m \"asked the user to run terraform apply\""
+printf '# Charter\n' > docs/ops/charter.md
+expect "ops guard: an uncommitted edit of the charter changes nothing" 2 "under ## Never" ohook "$og" "terraform apply"
+git checkout -q -- docs/ops/charter.md
+expect "ops guard: setting the switch in a command is refused" 2 "the user's switch" ohook "$og" "BSTACK_NO_ENFORCE=1 terraform plan"
+expect "ops guard: the user's switch turns it off" 0 "" ohook "$og" "terraform apply" BSTACK_NO_ENFORCE=1
+expect "ops guard: reading the switch passes" 0 "" ohook "$og" "printenv BSTACK_NO_ENFORCE"
+expect "ops guard: a ~ path without HOME passes" 0 "" ohook "$og" "ls ~/docs" -u HOME
+# another repository reached from outside: a home folder with the product nested in it
+mkdir "$work/home" && cd "$work/home" && git init -q -b main . || exit 2
+git config user.name test && git config user.email test@example.invalid
+echo home > README.md && commit init
+git clone -q "$og" product
+expect "ops guard: cd into a product meets its charter" 2 "under ## Never" ohook "$work/home" "cd product && terraform apply"
+expect "ops guard: a subshell that cds is seen" 2 "under ## Never" ohook "$work/home" "(cd \"product\"; terraform destroy)"
+expect "ops guard: a path into a product meets its charter" 2 "--live" ohook "$work/home" "product/a.txt --live"
+expect "ops guard: a path after = names the repository" 2 "under ## Never" ohook "$work/home" "env CONFIG=product/a.txt terraform apply"
+expect "ops guard: the home repo's own commands pass" 0 "" ohook "$work/home" "terraform apply"
+many=$(printf 'w%s ' $(seq 1 300))
+expect "ops guard: a path after hundreds of words is still seen" 2 "under ## Never" ohook "$work/home" "echo $many; cd product && terraform apply"
+expect "ops guard: a command that only names the product passes" 0 "" ohook "$work/home" "git -C product status"
+expect "ops guard: a path that does not exist yet names its repository" 2 "under ## Never" ohook "$work/home" "touch product/new/file.txt # terraform apply"
+expect "ops guard: one cd after another is followed" 2 "under ## Never" ohook "$work" "cd home && cd product && terraform apply"
+git clone -q "$og" "Project Two"
+expect "ops guard: a quoted path with a space is one path" 2 "under ## Never" ohook "$work/home" "cd 'Project Two' && terraform apply"
+expect "ops guard: an escaped space stays in its path" 2 "under ## Never" ohook "$work/home" "cd Project\\ Two && terraform apply"
+rm -rf "Project Two"
+# thousands of paths: the hook has 30 seconds
+quick() { local s=$SECONDS st; "$@"; st=$?; [ $((SECONDS - s)) -lt 10 ] || { echo "took $((SECONDS - s)) s"; return 99; }; return $st; }
+mkdir "$work/many" && cd "$work/many" && git init -q -b main . || exit 2
+dirs=$(printf 'dir%s ' $(seq 1 3000))
+# shellcheck disable=SC2086  # one directory a word
+mkdir $dirs
+expect "ops guard: a command naming 3000 directories is decided in time" 0 "" quick ohook "$work/many" "du -sh $dirs"
+cd "$work/home" || exit 2
+expect "ops guard: the session's project answers from another cwd" 2 "under ## Never" ohook "$work" "terraform apply" CLAUDE_PROJECT_DIR="$og"
+# taking a line out of ## Never is the user's commit
+cd "$og" || exit 2
+grep -v 'terraform' docs/ops/charter.md > c.tmp && mv c.tmp docs/ops/charter.md
+expect "ops guard: a commit of a charter that lost a line is refused" 2 "Only the user commits" ohook "$og" "git commit -am \"ops: charter\""
+expect "ops guard: git -C … commit is a commit" 2 "Only the user commits" ohook "$work" "git -C og commit -am x"
+expect "ops guard: a commit behind a quoted option is a commit" 2 "Only the user commits" ohook "$og" "git -c core.editor=\"a|b\" 'commit' -am x"
+expect "ops guard: git log --committer is not a commit" 0 "" ohook "$og" "git log --committer=Ben"
+expect "ops guard: HEAD^{commit} is not a commit" 0 "" ohook "$og" "git rev-parse HEAD^{commit}"
+git add docs/ops/charter.md && git checkout -q HEAD -- a.txt
+git show HEAD:docs/ops/charter.md > docs/ops/charter.md
+expect "ops guard: a staged charter that lost a line is refused" 2 "Only the user commits" ohook "$og" "git commit -m \"ops: charter\""
+git reset -q --hard HEAD
+awk '{ print } /^## Never/ { print "- `kubectl delete`: the cluster is the user\047s" }' docs/ops/charter.md > c.tmp \
+  && mv c.tmp docs/ops/charter.md
+git add docs/ops/charter.md
+expect "ops guard: a commit that only adds lines passes" 0 "" ohook "$og" "git commit -m \"ops: one more line\""
+git reset -q --hard HEAD
+cd "$work" || exit 2
 
 printf '%s checks, %s failed\n' "$n" "$fails"
 [ "$fails" -eq 0 ]

@@ -11,8 +11,13 @@ stands, and why things were decided. Everything else is branches, commits and tr
   repo's overseer does (`planning.md` `## 4`), write
   `{"status":"approved","approved_at":"<YYYY-MM-DD HH:MM>","plan_commit":"<sha>","approved_by":"<user|overseer>"}`,
   where `plan_commit` is the commit holding the signed-off `docs/plan.md`. Commit it with a log
-  line.
+  line. A `shipped_at` and `shipped_sha` already in the record stay: they say what is in
+  operation until the next ship.
 - Nothing is built while the record is not `approved`.
+- When the product has shipped and its cold read is done (`acceptance.md` `## 4`), set `status`
+  to `shipped` and write `shipped_at`, when it went out, and `shipped_sha`, the accepted
+  `rc_sha`; the other fields stay. A shipped record covers no new work: the next request is a
+  new plan (`planning.md` `## 1`).
 - On a material plan change, stop: show `git diff <plan_commit> -- docs/plan.md`, ask again, and
   write a new record only on a new approval.
 
@@ -43,7 +48,9 @@ The PM's records, never a story's code: `docs/stories/`, `docs/evidence/`, `docs
 `docs/log.md`, `docs/ledger.md`, `docs/plan.md`, `docs/handoff.md`, `docs/go-no-go.md`,
 `docs/acceptance-differences.md`,
 `docs/approval.json`, `docs/acceptance.json` and `docs/gate.txt`. A commit that touches only these
-leaves a gates or verifier sha valid; the merge guard holds the same list.
+leaves a gates or verifier sha valid; the merge guard holds the same list. It also holds
+the operator's `status.txt`, `log.md` and `runbook.md` under `docs/ops/`. Nothing under
+`docs/ops/` is yours to write, and a change to its `charter.md` voids a recorded sha.
 - `docs/gate.txt`, one line: `PASS|FAIL <sha> <YYYY-MM-DD HH:MM> <failing tests>`, the full gates on
   the integration head after each merge (`loop.md` step 8). Absent means not yet run.
 - `docs/ledger.md`: one row per reviewed story's outcome (merged, blocked, replaced or abandoned),
@@ -72,8 +79,10 @@ sprint (`planning.md` `## 4`).
 ## Resume
 Read, in order: `docs/handoff.md` if present, then skip what its SKIP line lists; `docs/approval.json`; `git log --first-parent <integration branch>`; every
 story's `pm-exec`; `git worktree list --porcelain`; `t3_thread_read` of each thread a non-merged
-block records; the last ~20 lines of `docs/log.md`. Not approved means planning; approved with no
-stories means decomposition. Then re-enter each story from its `status` (steps per `loop.md`):
+block records; the last ~20 lines of `docs/log.md`. `pending` means planning; `approved` with no
+stories means decomposition. `shipped` means that work is over: say what shipped and when, and
+take a request as a new plan (`planning.md` `## 1`), never as a change to the shipped one. Then
+re-enter each story from its `status` (steps per `loop.md`):
 - `claimed`, no `thread`: dispatch step 2 or 3. Its fixed key returns the child of a lost response.
 - `claimed`, a `thread`, no `Tests:` line: the tests child. Finished: check its last result
   (step 2). Cancelled or interrupted: `t3_thread_send` it to continue, as step 3 resumes a build.

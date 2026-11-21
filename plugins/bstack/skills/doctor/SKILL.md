@@ -1,19 +1,19 @@
 ---
 name: doctor
-description: Check readiness before implementation, covering the T3 host, the toolchain, whether the project's gates pass, Codex availability, log.sh and the pre-push secret scan. In a home repo, check that the overseer's scheduled check is still running and every product is visible to it.
+description: Check readiness before implementation, covering the T3 host, the toolchain, whether the project's gates pass, Codex availability, log.sh and the pre-push secret scan. In a repository set up for operation, check the ops guard, the operator's rounds and the runbook. In a home repo, check that the overseer's scheduled check is still running and every product is visible to it.
 argument-hint: "[sub-path or component]"
 ---
 
 If you were dispatched as a child agent (your task begins 'You are a bstack … child'), do not use this skill.
 
-`references/…` below means `${CLAUDE_PLUGIN_ROOT}/skills/project-manager/references/…`, and
+`references/…` below means `${CLAUDE_PLUGIN_ROOT}/skills/pm/references/…`, and
 `<plugin>` in any reference means `${CLAUDE_PLUGIN_ROOT}`. Neither is a shell variable: write the
 path out in every command.
 
 In a home repo (its `AGENTS.md` has `## Repos`), run `## Home` at the end instead of what
 follows: a home repo has no plan, gates or merge guard of its own.
 
-Run the `bstack:project-manager` skill's procedure (load that skill first) for a readiness check.
+Run the `bstack:pm` skill's procedure (load that skill first) for a readiness check.
 Install or upgrade nothing, and write no file of your own. Running a gate may leave the artifacts
 a normal run produces (build output, caches, coverage); leave them as the run left them.
 
@@ -49,13 +49,13 @@ Check, in order, each with its evidence:
 6. **Secret scan**, `OK`, `MISSING`, `OUTDATED` or `BYPASSED`. Check `pre-push` in the `hooks`
    directory of `git rev-parse --git-common-dir`. If `git config core.hooksPath` prints a path,
    git ignores that hook: `BYPASSED` unless the `pre-push` under that path calls it; name the path
-   and offer the one-line call `references/planning.md` `## 5. Scaffold, after sign-off` gives.
+   and offer the one-line call `references/scaffold.md` gives.
    `OK`: executable and byte-equal (`cmp`) to
    `"${CLAUDE_PLUGIN_ROOT}/scripts/scan-secrets.sh"`. `OUTDATED`: it has the
    `# bstack secret-scan pre-push` line, or the old `# deliver secret-scan pre-push` one, but
    differs; offer to refresh it with that copy.
    `MISSING`: absent, not executable, or another hook without either line (show it; never replace it
-   unasked). Install it as `references/planning.md` `## 5. Scaffold, after sign-off` says.
+   unasked). Install it as `references/scaffold.md` says.
 
 7. **Merge guard**, `OK`, `OFF` or `BROKEN`. Feed it a payload it must refuse:
    `printf '{"cwd":"%s","tool_input":{"command":"BSTACK_NO_ENFORCE=1 git merge pm/S0-0-doctor"}}' "$PWD" | bash "${CLAUDE_PLUGIN_ROOT}/scripts/merge-guard.sh"`
@@ -68,21 +68,42 @@ Check, in order, each with its evidence:
    too long ahead of main, a tag missing from main, branches or worktrees of merged stories, PM
    scripts outside a tracked `ops/pm/`, struck-through or superseded text left in the plan, spec
    or `AGENTS.md`. Each names its fix.
+9. **Operation**, only where `docs/ops/charter.md` exists. Load `list_scheduled_tasks` for it.
+   - **Ops guard**, `OK`, `NONE`, `OFF` or `BROKEN`. From the main checkout,
+     `bash "${CLAUDE_PLUGIN_ROOT}/scripts/ops-guard.sh" --list` prints the patterns it reads
+     from the committed charter's `## Never`. `OK` names how many. `NONE` when the section has
+     no list line: no command is refused. `BROKEN` when it fails, or prints fewer patterns than
+     the section has list lines: quote the output. `OFF` as in step 7.
+   - **Rounds**, `OK`, `MISSING`, `PAUSED`, `OVERDUE` or `ON REQUEST`. The charter's `Rounds:`
+     gives the interval; `on request` is `ON REQUEST`. Otherwise `list_scheduled_tasks` holds a
+     task with prompt `/bstack:operator round` bound to a thread of this project: none is
+     `MISSING`, one not enabled is `PAUSED`, and `OVERDUE` is a `docs/ops/status.txt` that is
+     absent or whose time is older than twice the interval. In each of those no goal is being checked, and nothing
+     else will say so.
+   - **Runbook**, `OK` or `STALE`. `STALE` when `docs/approval.json` has a `shipped_sha` and
+     the runbook's `Version:` differs from it, or a recipe is marked `unconfirmed`: name each.
 
 End with a one-line verdict: ready only when the host, toolchain, Codex, log, secret scan and
 merge guard checks are `OK` and every gate is `PASS` or `N/A`. Otherwise name the blockers and
-what each needs. Hygiene warnings never block; list them after the verdict.
+what each needs. Hygiene warnings and the operation lines never block; list them after the
+verdict, with what each needs: `/bstack:setup-ops` schedules rounds that are `MISSING`, a
+`PAUSED` task is the user's to resume in T3, and `/bstack:operator round` brings the runbook up
+to date.
 
 ## Home
 Whether the overseer is still watching. Schedule, register and write nothing. Check, in order,
 each with its evidence:
 1. **T3 host**, as step 1 above, loading `list_scheduled_tasks` and `t3_project_list` with it.
-2. **Scheduled check**, `OK`, `MISSING`, `PAUSED` or `OVERDUE`. `list_scheduled_tasks` holds one
-   task whose prompt is `/bstack:home check`. None is `MISSING`, and one that is not enabled is
-   `PAUSED`: no product is being watched, and nothing else will say so. `OVERDUE`: the first
-   line of `docs/watch.md`, `Checked <time>, took <n> min`, is older than twice the task's
-   interval, or absent although a check has been due. `OK` names the interval and the sessions a day it starts (72 at 20
-   minutes). Two such tasks double that: name both.
+2. **Scheduled check**, `OK`, `MISSING`, `PAUSED`, `OVERDUE` or `OUTDATED`. `list_scheduled_tasks`
+   holds one task whose prompt is `/bstack:overseer check`. None is `MISSING`, and one that is not
+   enabled is `PAUSED`: no product is being watched, and nothing else will say so. `OVERDUE`: the
+   first line of `docs/watch.md`, `Checked <time>, took <n> min`, is older than twice the task's
+   interval, or absent although a check has been due. `OK` names the interval and the sessions a
+   day it starts (72 at 20 minutes). Two such tasks double that: name both.
+   `OUTDATED`: in its place is a task whose prompt is `/bstack:home check`. That skill is gone, so
+   the task runs nothing and no product is being watched, enabled and on time or not.
+   `/bstack:overseer` offers to repair it and keeps its interval. Beside a healthy
+   `/bstack:overseer check` task the old one is a leftover: name it, and the check is still `OK`.
 3. **Check length**, `OK` or `SLOW`. `SLOW` when `took <n> min` is at or over the interval.
 4. **Products**, one line for each pointer under `## Repos`: `OK`; `MISSING`, with no git
    repository at its path; or `UNREGISTERED`, with no T3 project whose `workspaceRoot` is that
@@ -92,5 +113,5 @@ each with its evidence:
    (three at the default).
 
 End with a one-line verdict: watching only when the host and the scheduled check are `OK` and
-every product is `OK`. Otherwise name what each needs; `/bstack:home setup` schedules a check
-and registers a product, asking first.
+every product is `OK`. Otherwise name what each needs; `/bstack:setup-home` schedules a
+check and registers a product, asking first, and `/bstack:overseer` repairs an `OUTDATED` check.

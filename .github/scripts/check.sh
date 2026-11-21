@@ -6,7 +6,7 @@ set -uo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 cd "$root" || exit 2
 b=plugins/bstack
-refs=$b/skills/project-manager/references
+refs=$b/skills/pm/references
 fails=0
 ok() { printf 'ok   %s\n' "$1"; }
 bad() { fails=$((fails + 1)); printf 'FAIL %s\n' "$1"; }
@@ -21,13 +21,17 @@ top=$(sed -n 's/^## \([0-9][^ ]*\).*/\1/p' CHANGELOG.md | head -1)
 if [ -n "$ver" ] && [ "$ver" = "$top" ]; then ok "version $ver matches the top CHANGELOG heading"
 else bad "plugin.json version '$ver' differs from the top CHANGELOG heading '$top'"; fi
 
-# 2. Every bstack SKILL.md stays under 16,000 characters, with a name equal to its directory
-#    and a description. No commands directory.
+# 2. Every bstack SKILL.md stays under 16,000 characters, with a name equal to its directory,
+#    a description and the child guard as its first line. No commands directory.
 for f in "$b"/skills/*/SKILL.md; do
   d=$(basename "$(dirname "$f")")
   c=$(wc -m < "$f" | tr -d ' ')
   if [ "$c" -lt 16000 ]; then ok "$d/SKILL.md is $c characters"; else bad "$d/SKILL.md is $c characters, the limit is 16,000"; fi
   grep -qx "name: $d" "$f" || bad "$d/SKILL.md lacks 'name: $d'"
+  # A child sees every bstack skill, so each one turns a child away first.
+  guard=$(awk '/^---$/{n++; next} n>=2 && NF{print; exit}' "$f")
+  case "$guard" in "If you were dispatched as a child agent"*"do not use this skill.") ;;
+    *) bad "$d/SKILL.md does not open with the child guard" ;; esac
   grep -q '^description: .' "$f" || bad "$d/SKILL.md lacks a description"
 done
 if [ -e "$b/commands" ]; then bad "$b/commands exists; entry points are skills"; else ok "no commands directory"; fi
@@ -35,7 +39,7 @@ if [ -e "$b/commands" ]; then bad "$b/commands exists; entry points are skills";
 # 3. Every reference and template a skill or reference names exists.
 miss=0
 for r in $(grep -rhoE 'references/[a-z-]+\.md' "$b/skills" | sort -u); do
-  [ -f "$b/skills/project-manager/$r" ] || { miss=1; bad "named but missing: $r"; }
+  [ -f "$b/skills/pm/$r" ] || { miss=1; bad "named but missing: $r"; }
 done
 for t in $(grep -rhoE '[A-Za-z.-]+\.template' "$b/skills" | sort -u); do
   [ -f "$b/templates/$t" ] || { miss=1; bad "named but missing: templates/$t"; }
@@ -44,18 +48,17 @@ done
 for h in '## Chair soul' '## Member soul'; do
   grep -qx "$h" "$b/skills/board/souls.md" 2>/dev/null || { miss=1; bad "souls.md lacks '$h'"; }
 done
-[ -f "$b/skills/home/soul.md" ] || { miss=1; bad "named but missing: skills/home/soul.md"; }
 for h in '## Overseer soul' '## Tools' '## Rules'; do
-  grep -qx "$h" "$b/skills/home/soul.md" 2>/dev/null || { miss=1; bad "home/soul.md lacks '$h'"; }
+  grep -qx "$h" "$b/skills/overseer/SKILL.md" 2>/dev/null || { miss=1; bad "overseer/SKILL.md lacks '$h'"; }
 done
 [ "$miss" -ne 0 ] || ok "every named reference, template and soul exists"
 
-# 3b. Token budgets. project-manager/SKILL.md loads every session; the phase references load only
+# 3b. Token budgets. pm/SKILL.md loads every session; the phase references load only
 #     at their phase; a child's dispatch (## Common + its soul + the header skeleton) stays under
 #     its limit below. Raise a number only on purpose, with a CHANGELOG line saying why.
-pmsk=$(wc -c < "$b/skills/project-manager/SKILL.md" | tr -d ' ')
-if [ "$pmsk" -le 6257 ]; then ok "project-manager/SKILL.md is $pmsk bytes (budget 6257)"
-else bad "project-manager/SKILL.md is $pmsk bytes, over its 6257 budget"; fi
+pmsk=$(wc -c < "$b/skills/pm/SKILL.md" | tr -d ' ')
+if [ "$pmsk" -le 6430 ]; then ok "pm/SKILL.md is $pmsk bytes (budget 6430)"
+else bad "pm/SKILL.md is $pmsk bytes, over its 6430 budget"; fi
 for r in acceptance release; do
   c=$(wc -c < "$refs/$r.md" 2>/dev/null | tr -d ' ')
   if [ -n "$c" ] && [ "$c" -le 4096 ]; then ok "$r.md is $c bytes (budget 4096)"
@@ -76,7 +79,7 @@ for pair in builder:2005:PRIOR reviewer:2035:PRIOR verifier:1744:PRIOR \
 done
 
 # 4. ${CLAUDE_PLUGIN_ROOT} is substituted only in a SKILL.md body and hooks.json: references say <plugin>.
-if grep -rn 'CLAUDE_PLUGIN_ROOT' "$refs" "$b/templates" "$b/skills/board/souls.md" "$b/skills/home/soul.md"; then
+if grep -rn 'CLAUDE_PLUGIN_ROOT' "$refs" "$b/templates" "$b/skills/board/souls.md"; then
   bad "a reference or template uses \${CLAUDE_PLUGIN_ROOT}; write <plugin> there"
 else ok "no \${CLAUDE_PLUGIN_ROOT} outside a SKILL.md body"; fi
 for f in "$b"/skills/*/SKILL.md; do
@@ -92,16 +95,20 @@ done
 
 # 6. The only code in the plugin is its scripts, executable, with LF endings, and the hook that
 #    runs one of them.
-scripts="hygiene.sh ledger.sh log.sh merge-guard.sh scan-secrets.sh"
+scripts="hygiene.sh ledger.sh log.sh merge-guard.sh ops-guard.sh scan-secrets.sh"
 code=$(git ls-files "$b" | grep -vE '\.(md|json|template)$' | sort | tr '\n' ' ')
 want=$(for s in $scripts; do printf '%s/scripts/%s ' "$b" "$s"; done)
-if [ "$code" = "$want" ]; then ok "the plugin's only code is its five scripts"
+if [ "$code" = "$want" ]; then ok "the plugin's only code is its six scripts"
 else bad "unexpected non-prose files in the plugin: $code"; fi
 if grep -q '"PreToolUse"' "$b/hooks/hooks.json" 2>/dev/null \
    && grep -q 'CLAUDE_PLUGIN_ROOT}/scripts/merge-guard.sh' "$b/hooks/hooks.json" \
-   && python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$b/hooks/hooks.json" 2>/dev/null; then
-  ok "hooks/hooks.json runs merge-guard.sh on PreToolUse"
-else bad "hooks/hooks.json is missing, invalid, or does not run scripts/merge-guard.sh"; fi
+   && grep -q 'CLAUDE_PLUGIN_ROOT}/scripts/ops-guard.sh' "$b/hooks/hooks.json" \
+   && python3 -c 'import json,sys
+c=[h["command"] for e in json.load(open(sys.argv[1]))["hooks"]["PreToolUse"] if e.get("matcher")=="Bash" for h in e["hooks"]]
+sys.exit(0 if all(any(s in k for k in c) for s in ("/scripts/merge-guard.sh","/scripts/ops-guard.sh")) else 1)' \
+     "$b/hooks/hooks.json" 2>/dev/null; then
+  ok "hooks/hooks.json runs merge-guard.sh and ops-guard.sh on PreToolUse, on Bash"
+else bad "hooks/hooks.json is missing, invalid, or does not run both guards on every Bash call"; fi
 # Exec form (`args`) resolves `bash` on PATH, which on Windows is often WSL's bash.exe, not Git Bash.
 if grep -q '"args"' "$b/hooks/hooks.json"; then
   bad "hooks/hooks.json uses exec form (args); write the shell form so Windows runs it through Git Bash"

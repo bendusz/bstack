@@ -1,11 +1,12 @@
 {
-  "description": "bstack merge guard: refuses a story merge (git merge pm/*) without gates, review, verifier and technical writer recorded at the branch head, or while the integration gate is red. Only the user may switch it off, with BSTACK_NO_ENFORCE=1.",
+  "description": "bstack guards. The merge guard refuses a story merge (git merge pm/*) without gates, review, verifier and technical writer recorded at the branch head, or while the integration gate is red. The ops guard refuses a command that docs/ops/charter.md lists under ## Never. Only the user may switch them off, with BSTACK_NO_ENFORCE=1.",
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/merge-guard.sh\"", "timeout": 30 }
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/merge-guard.sh\"", "timeout": 30 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/ops-guard.sh\"", "timeout": 30 }
         ]
       }
     ]

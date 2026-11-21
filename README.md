@@ -7,7 +7,7 @@ and the PM runs the gates and merges. It never writes implementation code itself
 
 **Requirements.** T3 Code, with Codex available in T3. bstack dispatches every role through T3
 and stops if T3 is not there. The merge guard needs `jq`, `python3` or `node` to read its input,
-and refuses every story merge without one. The default workflow needs Codex for the opposite-family review,
+and refuses every story merge without one; the ops guard needs the same. The default workflow needs Codex for the opposite-family review,
 the design review and research. You may name other models for any dispatch. bstack leans on how T3 behaves
 (where it puts a worktree, what a child's result carries, how a reused request key answers).
 Dispatch, messaging and the model ids were last checked against T3 Code 0.1.9 nightly on
@@ -49,6 +49,11 @@ Where a machine can check a rule, a script does:
   passing gates, review, verifier and technical writer at the branch head, the integration gate
   is not red, and it merges one story at a time. Only you can switch it off, by starting Claude
   Code with `BSTACK_NO_ENFORCE=1`.
+- **Ops guard.** A second hook refuses any command that a repository's `docs/ops/charter.md`
+  lists under `## Never`, in every Claude Code session working there or reaching into it from
+  another folder. It also refuses an agent's commit that takes a line out of that list: only
+  you commit that. A child on another provider, such as a Codex builder, runs no Claude Code
+  hook and is not covered. The same switch turns it off.
 - **`ledger.sh`.** One row per reviewed story's outcome, merged or not: its lineage, rounds,
   first-pass, reruns, wall time and model per role. It counts no tokens: tracking them would pull
   the PM's attention off the work.
@@ -88,7 +93,10 @@ plugin), then run the two steps above. Projects keep working; see the 1.0.0 and 
 
 ## Use
 
-Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <request>`.
+Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <request>`. On a
+project that is already signed off, `/bstack:pm` picks it up where it stands, and on a product
+that has shipped it starts a new plan for the request. To prepare a
+repository before anything is planned, run `/bstack:setup-project`.
 
 1. **Plan.** The PM talks it through with you and writes `docs/plan.md`: scope, requirements and
    the low-level design (decisions, contracts, invariants, failure flows). When the project ends,
@@ -108,7 +116,9 @@ Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <r
    ends with the journey gate, a retro that proposes `AGENTS.md` learnings as a diff, and a demo.
    A one-story fix skips the spec, sprints and retro.
 6. **Accept and release.** You walk the release candidate and record your acceptance; a
-   production release adds a binding go/no-go.
+   production release adds a binding go/no-go. Once it has shipped, the approval record says
+   `shipped`, and nothing more is built until a new plan is signed off. To have it run and
+   used from then on, see [Operation](#operation).
 
 ## Roles
 
@@ -132,18 +142,23 @@ overseer starts each PM on `claude-fable-5-2` high (`claude-opus-5-5` high).
 
 ## Skills
 
-Each is a skill: run it as `/bstack:<name>`, or describe the task and Claude picks it up.
+Each is a skill: run it as `/bstack:<name>`, or describe the task and Claude picks it up. A role
+skill makes the session that role. A setup skill prepares a folder and takes on no role.
 
 | Skill | What it does |
 |---|---|
-| `/bstack:pm` | Act as the PM end to end: plan, sign-off, stories, loop, ship. |
+| `/bstack:pm` | Role: the PM. Plans a request end to end, or picks a signed-off project up where it stands. |
+| `/bstack:overseer` | Role: the overseer of a home repo. Checks the products, passes on requests, starts new products and keeps the wiki. |
+| `/bstack:operator` | Role: the operator. Runs and uses a product that is built: checks its goals, does its jobs, and reports what operating cannot put right. |
+| `/bstack:setup-project` | Setup: registers a repository with T3 and adds `AGENTS.md`, the `CLAUDE.md` bridge and the secret scan, before any plan. |
+| `/bstack:setup-home` | Setup: turns a folder that holds several product repositories into a home repo. |
+| `/bstack:setup-ops` | Setup: reads how a product is run, agrees its goals and the operator's limits with you, writes the charter and the runbook and schedules the rounds. |
 | `/bstack:resume` | Pick up from git, the approval record, the story Execution blocks and the log. |
-| `/bstack:doctor` | Check the T3 host, the toolchain, the project's gates, Codex, `log.sh`, the secret scan, the merge guard and project hygiene. In a home repo, check that the overseer's scheduled check is running and each product is visible to it. |
+| `/bstack:doctor` | Check the T3 host, the toolchain, the project's gates, Codex, `log.sh`, the secret scan, the merge guard and project hygiene. Where a repository is set up for operation, check the ops guard, the operator's rounds and the runbook. In a home repo, check that the overseer's scheduled check is running and each product is visible to it. |
 | `/bstack:retro` | Run the sprint boundary's cross-story review and retrospective. |
 | `/bstack:codex` | `review` a commit, worktree, branch or codebase with Codex, or `ask` it a question. |
 | `/bstack:skeleton` | Write or extend the SpecDD skeleton for a sprint. |
 | `/bstack:board` | Convene the board: a 0-10 status score with recommendations, or `ask` it a question. |
-| `/bstack:home` | Set up a home repo over several product repositories and act as its overseer. |
 
 ## The board
 
@@ -171,8 +186,8 @@ go to `docs/board/` in a project the PM manages, and to `tmp/board/` anywhere el
 
 ## Home repo
 
-`/bstack:home` turns a folder that holds several product repositories into a home repo, with
-Claude as its overseer. The home repo delivers nothing: it has no plan, approval record or
+`/bstack:setup-home` turns a folder that holds several product repositories into a home repo,
+and `/bstack:overseer` makes Claude its overseer. The home repo delivers nothing: it has no plan, approval record or
 stories. Each product keeps its own PM, in its own T3 project and thread, with its own gates and
 merge guard. The overseer answers for you wherever the answer is not yours alone, so a product
 you are not watching keeps moving.
@@ -210,7 +225,7 @@ you are not watching keeps moving.
   overseer may tell the PM to adopt a recommendation that stays inside the plan.
 - **Check-ups.** A scheduled check, every 20 minutes unless you choose otherwise, reads each
   product's gate, stories and PM thread, and acts on what changed. It keeps `docs/watch.md`:
-  what needs you, what was decided for you and one line per product. `/bstack:home seen`
+  what needs you, what was decided for you and one line per product. `/bstack:overseer seen`
   clears the decided list once you have read it. Its first line is the time of the last check.
 - **What it costs.** Each check is a fresh session that reads every product: 72 a day at 20
   minutes, whether or not anything changed. A board meeting is nine runs, eight member runs and
@@ -220,7 +235,29 @@ you are not watching keeps moving.
   project. Nothing else tells you that the checks have stopped.
 - **Wiki.** `wiki/` holds what is true across the products: contracts between them, shared
   standards, the glossary and lessons that apply to more than one. Tell the overseer something
-  to remember, ask it a question, or run `/bstack:home lint`.
+  to remember, ask it a question, or run `/bstack:overseer lint`.
+
+## Operation
+
+Once a product is built, `/bstack:setup-ops` puts it under an operator and `/bstack:operator`
+makes Claude that operator. The PM builds; the operator runs and uses what is built, and changes
+no code.
+
+- **The charter**, `docs/ops/charter.md`, is yours. It holds the goals, each with a command
+  that decides whether it is met, and three lists: what the operator does unasked, what waits
+  for your yes each time, and what no agent ever runs. The ops guard enforces the last list in
+  Claude Code sessions. The operator proposes a change to the charter as a diff and never
+  widens it itself.
+- **The runbook**, `docs/ops/runbook.md`, is the operator's: where the product runs, each job's
+  recipe, the rollback, and each failure it has met with the remedy that worked. Setup writes
+  it from what the repository says, and the operator keeps it true.
+- **Rounds.** On a schedule you choose, the operator runs each goal's check and each job that
+  is due, and writes one line to `docs/ops/status.txt`: `OK`, `DEGRADED` or `DOWN`. A miss it
+  can put right by operating, it does. A defect it reports as `FIX NEEDED`; the fix is a new
+  plan for the PM, and starting it is yours. A critical goal it cannot restore is an `INCIDENT`.
+- **Under a home repo** the overseer passes on a request to run or use a product, shows each
+  product's operating status beside its delivery status, and puts every incident, fix and
+  ask-first question in front of you.
 
 ## State and the decision log
 

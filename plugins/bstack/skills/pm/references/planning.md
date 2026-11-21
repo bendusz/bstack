@@ -7,6 +7,9 @@ plan, no spec and no sprints. Nothing is built before sign-off.
 ## 1. Ground
 - Not a git repository: offer `git init`, and ask first. Git is the record, so planning needs it.
 - Create `docs/approval.json` as `pending` per `state.md` `## Approval`; commit it with the first draft.
+- A product whose record says `shipped` starts its next plan here: set `status` back to
+  `pending` and the three sign-off fields to `null`. `shipped_at` and `shipped_sha` stay. `docs/plan.md` is what shipped and the base of the new plan: keep
+  what still holds, add the request to it, and put back the template sections it lacks.
 - Brownfield work: run one native Explore pass for the architecture, the conventions, the real
   test, lint and build commands, and where new code should go. Fold the answers into the plan's
   Design and Commands, and keep them for the stories' Context.
@@ -103,7 +106,8 @@ plan, no spec and no sprints. Nothing is built before sign-off.
   `plan_commit`. Write and commit the approved record exactly as `state.md` `## Approval` says.
 - Log the sign-off with its scope, and every decision you made without asking, with the why:
   `bash "<plugin>/scripts/log.sh" "<message>"` (`state.md` `## Log`).
-- No scaffold, no stories and no code before the record says `approved`.
+- No stories and no code before the record says `approved`, and no scaffold either unless the
+  user ran `/bstack:setup-project`.
 
 ### Change after sign-off
 Scope is frozen once a story starts. A date or scope change first gets Floor 6: the open go/no-go
@@ -145,41 +149,11 @@ found wrong goes through this path, never drip-fed into a running story:
    re-approval happened.
 
 ## 5. Scaffold, after sign-off
-Only add what is absent. Never overwrite a user-authored file without showing a diff and asking.
-- `AGENTS.md` from `<plugin>/templates/AGENTS.md.template`: facts only (commands,
-  layout, non-default conventions, gotchas), aiming at 30 to 40 lines. Replace every template
-  comment rather than copying it, since Codex reads a comment as an instruction. Every child
-  loads this file, so test each line: would removing it cause mistakes? Never copy procedure or
-  hard rules into it, nor a line saying the project runs on bstack. Keep the template's first
-  Conventions line as written; propose it as a diff to an `AGENTS.md` that lacks it.
-- `CLAUDE.md` from `<plugin>/templates/CLAUDE.md.template`, the `@AGENTS.md` bridge.
-  If `CLAUDE.md` exists without `AGENTS.md`, propose moving its content into a new `AGENTS.md`
-  and making `CLAUDE.md` the bridge; show the diff and ask. If both exist and `CLAUDE.md` is not
-  a bridge, leave both and tell the user.
+Follow `scaffold.md` for whatever is absent, on the integration branch. Before its commit:
 - With `Skeleton: specdd`, add the SpecDD line held in the `AGENTS.md.template` comment,
   uncommented, to the project `AGENTS.md` Conventions.
-- `.gitignore` includes `tmp/`, appended, never clobbered. `tmp/` is scratch and never enters git.
 - Any script you write to run the project lives tracked in `ops/pm/`, never in `tmp/` or
   untracked.
-- The pre-push secret scan, untracked, for every worktree: `pre-push` in the `hooks` directory of
-  `git rev-parse --git-common-dir`. Absent: copy `<plugin>/scripts/scan-secrets.sh` there and
-  `chmod 755` it (a copy: the plugin path changes on update). Present without its
-  `# bstack secret-scan pre-push` line: show it, ask, unless it has the old
-  `# deliver secret-scan pre-push` line: ours, outdated; offer to refresh it.
-- If `git config core.hooksPath` prints a path, git ignores that directory and a hook manager owns
-  pre-push. Install the copy all the same, then propose the one call that runs it, as a diff to
-  the manager's tracked file, and ask:
-  - husky, first line of `.husky/pre-push`:
-    `bash "$(git rev-parse --git-common-dir)/hooks/pre-push" "$@"`
-  - lefthook, a `pre-push` command with `use_stdin: true` and
-    `run: bash "$(git rev-parse --git-common-dir)/hooks/pre-push" {0}`
-  - any other manager: the same call from its pre-push, with the hook's arguments and stdin.
-
-  Until the user accepts, pushes go out unscanned: tell them so and log it.
-- Never create `.scan-secrets-allow` at scaffold. It gets a line only when the user approves one
-  for a false positive (`loop.md` step 8).
-- Commit on the integration branch only the files you created or changed, never `git add -A`.
-  If git has no `user.name` or `user.email`, ask before committing.
 
 ## 6. Decompose
 With `Skeleton: specdd`, run `skeleton.md` for the sprint first. Decompose one sprint at a time,

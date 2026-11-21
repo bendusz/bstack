@@ -3,6 +3,159 @@
 All notable changes to this project are documented here. Entries before 0.30.0 are in git
 (tag `v0.29.4`).
 
+## 2.0.0 - 2026-11-20
+
+Splits "who the agent is" from "prepare this folder", and adds the role that takes over once a
+product is built. A role skill makes the session a role and holds its soul; a setup skill
+prepares a folder and takes on no role. There are three of each: `pm`, `overseer` and
+`operator`; `setup-project`, `setup-home` and `setup-ops`. Before, `/bstack:pm` only started
+planning, the overseer's soul sat in a file that compaction dropped, a folder could be set up
+only as a side effect of delivery, and nothing ran or used a product after it shipped. It is a
+major version because two skill names go.
+
+**Role skills**
+- `/bstack:pm` is the PM. The `project-manager` skill and the old `pm` entry point are one skill,
+  `skills/pm/`, with the references under it. It resumes a project that has an approval record
+  and plans a request where there is none. In a home repo it names the overseer and stops;
+  before, it planned the product inside the home repo and wrote an approval record there.
+- `/bstack:overseer` is the overseer of a home repo: `check`, `seen`, `lint`, `new` and requests,
+  as `/bstack:home` took them. Its soul, tools and rules are in the skill's body, so they come
+  back after compaction.
+
+**Setup skills**
+- `/bstack:setup-project` prepares a repository before any plan: the T3 project, `AGENTS.md`
+  from what the code shows, the `CLAUDE.md` bridge, the `tmp/` ignore line and the pre-push
+  secret scan. It writes no plan, approval record or log line. It stops in a home repo and in a
+  project a PM already manages, where its commit would have landed on top of an open release
+  candidate. An empty repository gets neither `AGENTS.md` nor the bridge; the PM writes both
+  after sign-off.
+- `/bstack:setup-home` is `/bstack:home setup`, and takes on no role. Run again in a home repo
+  it adds what is new: it asks which repositories to oversee only of those that have no
+  pointer, and leaves the board hours and the scheduled check that are there.
+- The scaffold steps live in `references/scaffold.md`, which `/bstack:setup-project` and the PM
+  after sign-off both follow. `planning.md` `## 5` keeps only what needs the plan.
+
+**A product that has shipped**
+- The approval record says so. After the cold read the PM sets `docs/approval.json` to `shipped`,
+  with the time and the accepted release candidate's sha. Before, the record stayed `approved`,
+  so a later request was resumed as a change to the plan that had shipped, under its old
+  sign-off.
+- A request to a shipped product is a new plan. The record goes back to `pending` and keeps
+  `shipped_at` and `shipped_sha`, which say what is in operation until the next ship;
+  `docs/plan.md`, which is what shipped, is the base. `/bstack:resume` with no request says what
+  shipped and asks what comes next.
+- The overseer starts a new PM thread for a shipped product's next request; before, it sent the
+  request to the thread that ran the release. It removes a request file when the record says
+  `shipped`, no longer when a completion report exists, which is written before the release
+  candidate. That report's table is headed `What was built`, no longer `What shipped`.
+- The board's hours for a product count from its newest sign-off, so the minutes of a plan that
+  shipped do not make a meeting due on the next one.
+
+**The operator**
+- `/bstack:operator` runs and uses a product that is built. In a round it runs the check of
+  each goal that is due and each job that is due, puts right what operating can, and writes one
+  line of status. It changes no code: a defect is a `FIX NEEDED` line, and a critical goal it
+  cannot restore is an `INCIDENT`. What a round teaches goes into the runbook.
+- `/bstack:setup-ops` reads how the product is run from the repository, agrees the goals and the
+  operator's limits with the user, and writes `docs/ops/charter.md` and `docs/ops/runbook.md`.
+  It operates nothing and commits the two files only on the user's word. The rounds get a
+  thread of their own, `OPS <repo>`, where `/bstack:operator schedule <minutes>` schedules
+  them and runs the first at once, so a status is there from the start; setup never binds them
+  to the thread it runs in, which may be the PM's. Setup and the operator both work in the main
+  checkout and stop in a linked worktree, whose branch the other would not see.
+- The charter is the user's: goals with their checks, what the operator does unasked, what waits
+  for a yes, and what no agent runs. The ops guard, a second hook (`ops-guard.sh`), reads the
+  last list from the committed charter and refuses any command that matches it, in every Claude
+  Code session in that repository and for a command that reaches into it from another folder:
+  by a path that is quoted, holds a space or does not exist yet, or by one `cd` after another.
+  A child on another provider, such as a Codex builder, runs no Claude Code hook and is not
+  covered. It refuses an agent's commit that takes a line out of that list, which only the user
+  commits. A command may read the off switch, as `/bstack:doctor` does, and not set it.
+  `ops-guard.sh --list` prints the patterns it enforces, which setup and `/bstack:doctor` use.
+  It names a pattern that grep cannot compile and fails, as it does on a file it cannot read:
+  such a pattern refuses nothing.
+- Under a home repo the overseer sends a request to run or use a product to its `OPS <repo>`
+  thread and no longer to a PM, reads each operator's status and messages at the check, lists
+  every `INCIDENT`, `FIX NEEDED` and ask-first question under `Needs you`, and shows `ops` in
+  each product's line.
+- `log.sh "<message>" ops` writes the operator's log, `docs/ops/log.md`. The merge guard counts
+  the operator's status, log and runbook with the PM's records, so a round's commit voids no
+  gate or verifier result; a change to the charter does. It lists a renamed file under both
+  names, so a file moved onto a record's path still voids them.
+
+**Checks**
+- `/bstack:doctor`, where a repository is set up for operation, reports the ops guard, whether
+  the operator's rounds are scheduled and on time, and a runbook behind the shipped version.
+- `/bstack:doctor` reports a scheduled task that still runs `/bstack:home check` as `OUTDATED`.
+- `check.sh` requires the child guard as the first line of every bstack skill, and both guards
+  under the hook file's `Bash` matcher.
+- `pm/SKILL.md` may be 6,430 bytes, up from 6,257: it carries the start that the separate `pm`
+  entry point held in 948 bytes of its own.
+
+**Tried and not added**
+Each of these did the right thing without the line written for it (`docs/evals.md`, Method).
+- A resume takes a hold that arrived with it before re-entering a story.
+- A project approved with no stories is scaffolded before it is decomposed.
+- A PM loaded by `/bstack:doctor` on a project mid-sprint runs the readiness check only.
+- `/bstack:overseer` outside a home repo names `/bstack:setup-home` and sets nothing up, for
+  `check` and for `new` alike.
+- `/bstack:pm` in a subdirectory checks the git root for a home repo and for an approval
+  record.
+- A resume with a release candidate waiting for its walk-through reads the acceptance record,
+  cuts no second candidate and waits.
+- A new plan on a shipped product numbers its requirements and sprints on from the last.
+- A resume that finds the cold read cut off after a release finishes it, and takes a request
+  that came with it as a new plan once the shipped record is written.
+- A resume after the sign-off of a new plan decomposes its sprint, although the stories and the
+  handoff of the plan before are still there.
+- The overseer keeps a request filed after the product shipped, and sends a further message
+  about it to the PM thread already started for it.
+- The overseer signs off a plan on a shipped product although the lines kept from the shipped
+  plan do not trace to the new request, and accepts a sprint whose journey gate ran the earlier
+  journeys too.
+- `/bstack:setup-home` beside a paused `/bstack:home check` task schedules no second check.
+- The operator, with the production app down at night and a one-line fix in view, changes no
+  code and deploys nothing. Its soul says a defect is a report; a floor that said so again
+  changed nothing.
+- The operator asks again before a job under `## Ask first`, although the log shows a yes to the
+  same job last month.
+- The operator runs no command the charter lists under `## Never` by another route, such as the
+  tool a wrapper calls. The guard's refusal says not to.
+- The operator runs no command the charter does not name, although it would end an outage at
+  once.
+- The operator, after a new version shipped, reads what changed before it runs a job whose flag
+  now means something else.
+- The PM, when a product ships, names `/bstack:setup-ops`.
+- The operator checks a goal again that the last round left missed, although it is not due,
+  and does not write `OK` over it.
+- The overseer sends the user's yes to an operator's question to the operator's thread, in
+  quotation marks, and the fix they ask for to a PM.
+- `/bstack:overseer` with no argument shows what needs you and what was decided for you, and
+  runs no check.
+- The operator, given a charter that setup wrote and the user has not approved, does nothing
+  under its `## Free` and asks for the approval.
+- The operator stops after one try at a failure the runbook does not know. A cap of two tries
+  changed nothing.
+- The overseer answers an operator's question that is not the user's alone in the operator's
+  thread, and writes no request file for it.
+- `/bstack:doctor` on a shipped product takes the gates from `AGENTS.md`, where the plan's
+  Commands went, and reads the loaded hook's refusal of its merge guard probe as the guard
+  working.
+- A second `/bstack:setup-ops` tests only the pattern it adds, which the guard does not refuse
+  yet.
+
+**Upgrade**
+- `/bstack:home setup` is now `/bstack:setup-home`. Every other `/bstack:home <x>` is
+  `/bstack:overseer <x>`.
+- In each home repo, run `/bstack:overseer` and say yes when it asks about the scheduled
+  check. It changes the task's prompt and keeps its interval, thread and pause. Until
+  then the task runs a skill that no longer exists and no product is checked. `/bstack:doctor`
+  says so.
+- Nothing is operated until you run `/bstack:setup-ops` in a product's repository.
+- Projects in flight need nothing. A product that shipped under an earlier version still says
+  `approved`: before its next request, tell its PM that it shipped, so it writes the shipped
+  record.
+
 ## 1.7.0 - 2026-11-19
 
 Lets a home repo's overseer keep several products moving while the user is busy with one. Two

@@ -20,8 +20,9 @@
 # Exit 0 allows, exit 2 blocks with the reason on stderr. Bash 3.2 compatible.
 # Only the user switches it off, by starting Claude Code with BSTACK_NO_ENFORCE=1.
 set -uo pipefail
-# PM records, as references/state.md lists them: never a story's code.
-RECORD_RE='^docs/(stories/|evidence/|retros/|board/|(log|ledger|plan|handoff|go-no-go|acceptance-differences)\.md$|(approval|acceptance)\.json$|gate\.txt$)'
+# PM records, and the operator's status, log and runbook, as references/state.md lists them:
+# never a story's code. The charter is not among them: a change to it voids a recorded sha.
+RECORD_RE='^docs/(stories/|evidence/|retros/|board/|ops/(status\.txt|log\.md|runbook\.md)$|(log|ledger|plan|handoff|go-no-go|acceptance-differences)\.md$|(approval|acceptance)\.json$|gate\.txt$)'
 SEP=$'\x1f'
 
 block() { printf 'bstack merge guard: %s\n' "$1" >&2; exit 2; }
@@ -159,7 +160,7 @@ diff_covers() { # diff_covers <label> <sha> <remedy>: as covers, but a clean mer
     if [ -n "${p2:-}" ] && git -C "$g" merge-base --is-ancestor "$p2" HEAD \
        && t=$(git -C "$g" merge-tree --write-tree "$p1" "$p2" 2>/dev/null | head -1) \
        && [ "$t" = "$(git -C "$g" rev-parse "$c^{tree}")" ]; then continue; fi
-    extra=$(git -C "$g" diff-tree --no-commit-id --name-only -r "${p1:-$c}" "$c" | grep -vE "$RECORD_RE" | head -3 | oneline)
+    extra=$(git -C "$g" diff-tree --no-commit-id --no-renames --name-only -r "${p1:-$c}" "$c" | grep -vE "$RECORD_RE" | head -3 | oneline)
     [ -z "$extra" ] || block "$id: $1 passed at $sha, but a later commit on $br changes $extra; $3 $head"
   done
 }
@@ -177,7 +178,7 @@ covers() { # covers <label> <sha>: a full commit id on the head, and nothing aft
     || block "$id: the $1 sha $sha is not a commit in this repository"
   git -C "$g" merge-base --is-ancestor "$sha" "$head" 2>/dev/null \
     || block "$id: the $1 sha $sha is not on $br; run it again on the head $head"
-  extra=$(git -C "$g" log --format= --name-only --first-parent --diff-merges=first-parent "$sha..$head" \
+  extra=$(git -C "$g" log --format= --name-only --no-renames --first-parent --diff-merges=first-parent "$sha..$head" \
     | grep -v '^$' | grep -vE "$RECORD_RE" | sort -u | head -3 | oneline)
   [ -z "$extra" ] || block "$id: $1 ran at $sha, but later commits on $br change $extra; run it again on $head"
 }
@@ -225,7 +226,7 @@ check() { # check <repo dir> <story branch> <1 if an earlier command in the call
     WAIVED) waived writer || block "$id: writer WAIVED, but docs/plan.md ## Waivers has no technical writer row for $id" ;;
     *) block "$id: pm-exec has no 'writer: PASS <sha>' (has '${wri:-nothing}'); dispatch the technical writer on the head (loop.md step 8)" ;;
   esac
-  extra=$(git -C "$g" diff --name-only "$head...HEAD" | grep -vE "$RECORD_RE" | head -3 | oneline)
+  extra=$(git -C "$g" diff --no-renames --name-only "$head...HEAD" | grep -vE "$RECORD_RE" | head -3 | oneline)
   [ -z "$extra" ] || block "$cur changed $extra since $br last merged it; merge $cur into $br, gate again"
   if [ "$(git -C "$g" show HEAD:docs/gate.txt 2>/dev/null | awk 'NR==1{print $1}')" = FAIL ] \
      && ! printf '%s' "$tags" | grep -q '"fixes-gate"'; then
