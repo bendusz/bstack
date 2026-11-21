@@ -124,7 +124,7 @@ The user's scope is the ask: create it without a further question.
 1. Take the folder name the user gave, or choose a short one from the scope and say it.
 2. Make the folder under this one and run `git init` in it. Add its line to `.gitignore` and its
    pointer to `## Repos` in `AGENTS.md`.
-3. `t3_project_create` with its absolute path as `workspaceRoot`.
+3. `t3_project_create` with its absolute path as `workspaceRoot` and the folder name as `title`.
 4. Go on at `## A request for a product`, with the scope as the request. Everything inside the
    product is its PM's to create. Add no remote and push nothing: a push is the user's.
 

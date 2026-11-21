@@ -103,7 +103,8 @@ _Avoid_: playbook, ops docs
 
 **Round**:
 One pass of the operator over the goals and jobs that are due, ending in a line of
-`docs/ops/status.txt`.
+`docs/ops/status.txt`. A builder's turn on review findings is a fix round, counted in
+`pm-exec.rounds`.
 _Avoid_: check (the overseer's), health check, tick
 
 **Home repo**:

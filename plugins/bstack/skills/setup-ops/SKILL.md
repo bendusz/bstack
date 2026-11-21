@@ -23,7 +23,8 @@ charter already answers.
 2. Find the root with `git rev-parse --show-toplevel`; everything below is on the root. In a
    subdirectory, name the root and ask before going on. Stop, writing nothing, where there is
    no git repository, or the root is a home repo (`## Repos` in its `AGENTS.md`): operation is
-   set up in a product's own repository.
+   set up in a product's own repository. Stop too in a linked worktree, and name the main
+   checkout: the operator works there, and a charter committed on this branch is not on its.
 3. Read how the product is run. Never ask the user what the repository can say:
    - `AGENTS.md` and `docs/plan.md`: the Commands, the Design, and each `## Acceptance` journey
      with its recipe.
@@ -58,13 +59,13 @@ charter already answers.
 6. Show the user both files. The charter is theirs: commit only on their "approved", and only these
    two: `git add docs/ops/charter.md docs/ops/runbook.md`, then
    `git commit -m "ops: charter and runbook" -- docs/ops/charter.md docs/ops/runbook.md`. From that
-   commit on, the plugin's ops guard refuses the `## Never` commands for every agent here, and
-   any commit of theirs that takes a line out of `## Never`.
+   commit on, the plugin's ops guard refuses the `## Never` commands in every Claude Code
+   session here, and any commit of an agent's that takes a line out of `## Never`.
 7. With rounds on a schedule, and no task in `list_scheduled_tasks` with prompt
    `/bstack:operator round` bound to a thread of this project: the rounds get a thread of their
    own. `t3_thread_launch` one into this project, titled `OPS <repo>`, with the message
    `/bstack:operator schedule <minutes>`; the operator schedules its rounds there, and a home
    repo's overseer finds it by that title. Never bind the rounds to this thread or rename it:
    it may be the PM's.
-8. Tell the user what you wrote, which recipes are `unconfirmed`, when the first round runs,
-   and that `/bstack:operator` is how they work with the product from here.
+8. Tell the user what you wrote, which recipes are `unconfirmed`, that the first round runs
+   now in `OPS <repo>`, and that `/bstack:operator` is how they work with the product from here.

@@ -26,7 +26,8 @@ line. `docs/log.md` is the PM's; what you have to report, tell the user.
    - a project a PM already manages (`docs/approval.json` exists): its scaffold is that PM's, and
      a commit here could void a release candidate. Name `/bstack:doctor`.
 4. If no entry of `t3_project_list` has the root as `workspaceRoot`, offer `t3_project_create`
-   with it. Declined: go on, and say an overseer cannot reach the project until it is one.
+   with it and the folder name as `title`. Declined: go on, and say an overseer cannot reach
+   the project until it is one.
 5. Follow `references/scaffold.md`, committing on the branch that is checked out.
 6. Say what you created and what was already there. Then name what comes next:
    `/bstack:doctor` to check readiness, and `/bstack:pm <request>` to plan. The merge guard

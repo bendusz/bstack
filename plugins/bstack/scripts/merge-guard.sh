@@ -160,7 +160,7 @@ diff_covers() { # diff_covers <label> <sha> <remedy>: as covers, but a clean mer
     if [ -n "${p2:-}" ] && git -C "$g" merge-base --is-ancestor "$p2" HEAD \
        && t=$(git -C "$g" merge-tree --write-tree "$p1" "$p2" 2>/dev/null | head -1) \
        && [ "$t" = "$(git -C "$g" rev-parse "$c^{tree}")" ]; then continue; fi
-    extra=$(git -C "$g" diff-tree --no-commit-id --name-only -r "${p1:-$c}" "$c" | grep -vE "$RECORD_RE" | head -3 | oneline)
+    extra=$(git -C "$g" diff-tree --no-commit-id --no-renames --name-only -r "${p1:-$c}" "$c" | grep -vE "$RECORD_RE" | head -3 | oneline)
     [ -z "$extra" ] || block "$id: $1 passed at $sha, but a later commit on $br changes $extra; $3 $head"
   done
 }
@@ -178,7 +178,7 @@ covers() { # covers <label> <sha>: a full commit id on the head, and nothing aft
     || block "$id: the $1 sha $sha is not a commit in this repository"
   git -C "$g" merge-base --is-ancestor "$sha" "$head" 2>/dev/null \
     || block "$id: the $1 sha $sha is not on $br; run it again on the head $head"
-  extra=$(git -C "$g" log --format= --name-only --first-parent --diff-merges=first-parent "$sha..$head" \
+  extra=$(git -C "$g" log --format= --name-only --no-renames --first-parent --diff-merges=first-parent "$sha..$head" \
     | grep -v '^$' | grep -vE "$RECORD_RE" | sort -u | head -3 | oneline)
   [ -z "$extra" ] || block "$id: $1 ran at $sha, but later commits on $br change $extra; run it again on $head"
 }
@@ -226,7 +226,7 @@ check() { # check <repo dir> <story branch> <1 if an earlier command in the call
     WAIVED) waived writer || block "$id: writer WAIVED, but docs/plan.md ## Waivers has no technical writer row for $id" ;;
     *) block "$id: pm-exec has no 'writer: PASS <sha>' (has '${wri:-nothing}'); dispatch the technical writer on the head (loop.md step 8)" ;;
   esac
-  extra=$(git -C "$g" diff --name-only "$head...HEAD" | grep -vE "$RECORD_RE" | head -3 | oneline)
+  extra=$(git -C "$g" diff --no-renames --name-only "$head...HEAD" | grep -vE "$RECORD_RE" | head -3 | oneline)
   [ -z "$extra" ] || block "$cur changed $extra since $br last merged it; merge $cur into $br, gate again"
   if [ "$(git -C "$g" show HEAD:docs/gate.txt 2>/dev/null | awk 'NR==1{print $1}')" = FAIL ] \
      && ! printf '%s' "$tags" | grep -q '"fixes-gate"'; then

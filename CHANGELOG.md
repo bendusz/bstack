@@ -60,26 +60,35 @@ major version because two skill names go.
   operator's limits with the user, and writes `docs/ops/charter.md` and `docs/ops/runbook.md`.
   It operates nothing and commits the two files only on the user's word. The rounds get a
   thread of their own, `OPS <repo>`, where `/bstack:operator schedule <minutes>` schedules
-  them; setup never binds them to the thread it runs in, which may be the PM's.
+  them and runs the first at once, so a status is there from the start; setup never binds them
+  to the thread it runs in, which may be the PM's. Setup and the operator both work in the main
+  checkout and stop in a linked worktree, whose branch the other would not see.
 - The charter is the user's: goals with their checks, what the operator does unasked, what waits
   for a yes, and what no agent runs. The ops guard, a second hook (`ops-guard.sh`), reads the
-  last list from the committed charter and refuses any command that matches it, for every agent
-  in that repository and for a command that reaches into it from another folder. It refuses an
-  agent's commit that takes a line out of that list, which only the user commits.
-  `ops-guard.sh --list` prints the patterns it reads, which setup and `/bstack:doctor` use.
+  last list from the committed charter and refuses any command that matches it, in every Claude
+  Code session in that repository and for a command that reaches into it from another folder:
+  by a path that is quoted, holds a space or does not exist yet, or by one `cd` after another.
+  A child on another provider, such as a Codex builder, runs no Claude Code hook and is not
+  covered. It refuses an agent's commit that takes a line out of that list, which only the user
+  commits. A command may read the off switch, as `/bstack:doctor` does, and not set it.
+  `ops-guard.sh --list` prints the patterns it enforces, which setup and `/bstack:doctor` use.
+  It names a pattern that grep cannot compile and fails, as it does on a file it cannot read:
+  such a pattern refuses nothing.
 - Under a home repo the overseer sends a request to run or use a product to its `OPS <repo>`
   thread and no longer to a PM, reads each operator's status and messages at the check, lists
   every `INCIDENT`, `FIX NEEDED` and ask-first question under `Needs you`, and shows `ops` in
   each product's line.
 - `log.sh "<message>" ops` writes the operator's log, `docs/ops/log.md`. The merge guard counts
   the operator's status, log and runbook with the PM's records, so a round's commit voids no
-  gate or verifier result; a change to the charter does.
+  gate or verifier result; a change to the charter does. It lists a renamed file under both
+  names, so a file moved onto a record's path still voids them.
 
 **Checks**
 - `/bstack:doctor`, where a repository is set up for operation, reports the ops guard, whether
   the operator's rounds are scheduled and on time, and a runbook behind the shipped version.
 - `/bstack:doctor` reports a scheduled task that still runs `/bstack:home check` as `OUTDATED`.
-- `check.sh` requires the child guard as the first line of every bstack skill.
+- `check.sh` requires the child guard as the first line of every bstack skill, and both guards
+  under the hook file's `Bash` matcher.
 - `pm/SKILL.md` may be 6,430 bytes, up from 6,257: it carries the start that the separate `pm`
   entry point held in 948 bytes of its own.
 
@@ -123,6 +132,17 @@ Each of these did the right thing without the line written for it (`docs/evals.m
   quotation marks, and the fix they ask for to a PM.
 - `/bstack:overseer` with no argument shows what needs you and what was decided for you, and
   runs no check.
+- The operator, given a charter that setup wrote and the user has not approved, does nothing
+  under its `## Free` and asks for the approval.
+- The operator stops after one try at a failure the runbook does not know. A cap of two tries
+  changed nothing.
+- The overseer answers an operator's question that is not the user's alone in the operator's
+  thread, and writes no request file for it.
+- `/bstack:doctor` on a shipped product takes the gates from `AGENTS.md`, where the plan's
+  Commands went, and reads the loaded hook's refusal of its merge guard probe as the guard
+  working.
+- A second `/bstack:setup-ops` tests only the pattern it adds, which the guard does not refuse
+  yet.
 
 **Upgrade**
 - `/bstack:home setup` is now `/bstack:setup-home`. Every other `/bstack:home <x>` is

@@ -50,9 +50,10 @@ Where a machine can check a rule, a script does:
   is not red, and it merges one story at a time. Only you can switch it off, by starting Claude
   Code with `BSTACK_NO_ENFORCE=1`.
 - **Ops guard.** A second hook refuses any command that a repository's `docs/ops/charter.md`
-  lists under `## Never`, for every agent working there or reaching into it from another
-  folder. It also refuses an agent's commit that takes a line out of that list: only you
-  commit that. The same switch turns it off.
+  lists under `## Never`, in every Claude Code session working there or reaching into it from
+  another folder. It also refuses an agent's commit that takes a line out of that list: only
+  you commit that. A child on another provider, such as a Codex builder, runs no Claude Code
+  hook and is not covered. The same switch turns it off.
 - **`ledger.sh`.** One row per reviewed story's outcome, merged or not: its lineage, rounds,
   first-pass, reruns, wall time and model per role. It counts no tokens: tracking them would pull
   the PM's attention off the work.
@@ -244,8 +245,9 @@ no code.
 
 - **The charter**, `docs/ops/charter.md`, is yours. It holds the goals, each with a command
   that decides whether it is met, and three lists: what the operator does unasked, what waits
-  for your yes each time, and what no agent ever runs. The last list is enforced by the ops
-  guard. The operator proposes a change to the charter as a diff and never widens it itself.
+  for your yes each time, and what no agent ever runs. The ops guard enforces the last list in
+  Claude Code sessions. The operator proposes a change to the charter as a diff and never
+  widens it itself.
 - **The runbook**, `docs/ops/runbook.md`, is the operator's: where the product runs, each job's
   recipe, the rollback, and each failure it has met with the remedy that worked. Setup writes
   it from what the repository says, and the operator keeps it true.

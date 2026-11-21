@@ -25,5 +25,5 @@
 ## Never
 <!-- What no agent runs in this repository; the user runs it. One line each: an extended regular
      expression in backticks, then why. The plugin's ops guard reads this section from the last
-     commit and refuses any Bash command that matches. -->
+     commit and refuses any Bash command of a Claude Code session that matches. -->
 - `<pattern>`: <why this is the user's alone>

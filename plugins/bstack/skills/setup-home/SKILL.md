@@ -28,7 +28,8 @@ pointer, and step 4 also registers a pointer that is not a T3 project. Skip step
    Ask the user which ones the home repo oversees.
 4. Name the chosen repositories that are not T3 projects yet (none in `t3_project_list` has their
    absolute path as `workspaceRoot`). On the user's yes, `t3_project_create` each with that
-   `workspaceRoot`: a nested folder is not a project until it is registered.
+   `workspaceRoot` and its folder name as `title`: a nested folder is not a project until it is
+   registered.
 5. Ask how often the board reviews each product while it builds: 4 hours after sign-off and
    then every 8 hours by default, or never. Say what it costs: one meeting is eight member runs
    and a chair, and it is held only when a story has merged since the last one.

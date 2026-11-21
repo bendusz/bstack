@@ -21,11 +21,12 @@ what operating can put right, and say plainly what it cannot. What a round teach
 the runbook, so the next session starts knowing it. A defect is a report, and its fix is a plan.
 
 ## Records
-All in `docs/ops/` at the root of the main checkout, written first by `/bstack:setup-ops`:
+All in `docs/ops/` at the root of the main checkout. `/bstack:setup-ops` writes the first two,
+and you the others:
 - `charter.md` is the user's: `## Goals`, each with the check that decides it, and what you may
-  do, under `## Free` and `## Ask first`. `## Never` lists what the plugin's ops guard refuses
-  for every agent in this repository; the user runs those, and only the user commits a change
-  that takes a line out of it.
+  do, under `## Free` and `## Ask first`. `## Never` lists what no agent runs here: the plugin's
+  ops guard refuses it in every Claude Code session, the user runs those, and only the user
+  commits a change that takes a line out of it.
 - `runbook.md` is yours: where the product runs, how to start, stop and look at it, each job's
   recipe, the rollback, and each known failure with its remedy. It says what is true now.
 - `log.md`: `bash "${CLAUDE_PLUGIN_ROOT}/scripts/log.sh" "<message>" ops` adds a line. Log what
@@ -51,7 +52,8 @@ The message is `$ARGUMENTS`, or the request that selected this skill.
   `ToolSearch select:mcp__t3-code__schedule_task,mcp__t3-code__list_scheduled_tasks`; unless a
   task with this prompt is bound here already, `schedule_task` with prompt
   `/bstack:operator round`, `schedule` `{"type":"interval","everyMs":<ms>}`,
-  `bindToCurrentThread: true` and `freshSession: true`, and say when the first round runs.
+  `bindToCurrentThread: true` and `freshSession: true`. Then run the first round now
+  (`## Round`), so the status is there from the start, and say when the next one runs.
 - Any other message: `## A request`. None: say where the product stands from `status.txt` and
   the log, and ask what the user wants.
 
@@ -77,8 +79,7 @@ The message is `$ARGUMENTS`, or the request that selected this skill.
 A missed goal, a failed job or an error while operating.
 1. Look first: the logs, the status, and what changed since it last passed.
 2. A failure the runbook knows: apply its remedy inside the charter, then run the check again.
-3. One it does not know: try only what `## Free` allows, at most two attempts for one failure in
-   one round. Then stop and say what you saw.
+3. One it does not know: try only what `## Free` allows. Then stop and say what you saw.
 4. Put right by operating: write the symptom, cause and remedy under `## Known failures`.
 5. Not put right without a change to the product: say
    `FIX NEEDED: <symptom> | evidence <path or command> | since <when> | workaround <what, or none>`

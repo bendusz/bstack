@@ -103,9 +103,12 @@ else bad "unexpected non-prose files in the plugin: $code"; fi
 if grep -q '"PreToolUse"' "$b/hooks/hooks.json" 2>/dev/null \
    && grep -q 'CLAUDE_PLUGIN_ROOT}/scripts/merge-guard.sh' "$b/hooks/hooks.json" \
    && grep -q 'CLAUDE_PLUGIN_ROOT}/scripts/ops-guard.sh' "$b/hooks/hooks.json" \
-   && python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$b/hooks/hooks.json" 2>/dev/null; then
-  ok "hooks/hooks.json runs merge-guard.sh and ops-guard.sh on PreToolUse"
-else bad "hooks/hooks.json is missing, invalid, or does not run both guards"; fi
+   && python3 -c 'import json,sys
+c=[h["command"] for e in json.load(open(sys.argv[1]))["hooks"]["PreToolUse"] if e.get("matcher")=="Bash" for h in e["hooks"]]
+sys.exit(0 if all(any(s in k for k in c) for s in ("/scripts/merge-guard.sh","/scripts/ops-guard.sh")) else 1)' \
+     "$b/hooks/hooks.json" 2>/dev/null; then
+  ok "hooks/hooks.json runs merge-guard.sh and ops-guard.sh on PreToolUse, on Bash"
+else bad "hooks/hooks.json is missing, invalid, or does not run both guards on every Bash call"; fi
 # Exec form (`args`) resolves `bash` on PATH, which on Windows is often WSL's bash.exe, not Git Bash.
 if grep -q '"args"' "$b/hooks/hooks.json"; then
   bad "hooks/hooks.json uses exec form (args); write the shell form so Windows runs it through Git Bash"
