@@ -20,7 +20,8 @@ scripts and two hooks.
   - Setup skills prepare a folder and take on no role: `setup-project`, `setup-home` and
     `setup-ops`.
   - The other entry points are resume, doctor, retro, codex, skeleton and board. `board` keeps
-    its chair and member souls in `skills/board/souls.md`, which the chair child reads.
+    its chair and member souls and each seat's stake in `skills/board/souls.md`, which the chair
+    child reads; a seat's model is in the board's `SKILL.md`.
 - `plugins/bstack/templates/`: the artifacts the skills create in a project or a home repo.
 - `plugins/bstack/scripts/log.sh`: appends a timestamped line to a project's `docs/log.md`, or
   with `ops` to the operator's `docs/ops/log.md`.
@@ -51,7 +52,9 @@ scripts and two hooks.
   at most 4,096, and each role's dispatch (`## Common` + soul + header) under the limit `check.sh`
   holds for it.
 - Every `references/*.md` and every template a skill or reference names exists, and so does
-  `skills/board/souls.md` with its two souls. `skills/overseer/SKILL.md` has its soul, tools and
+  `skills/board/souls.md` with its two souls, the chair's procedure and one stake for each seat
+  that has a target in the board's `SKILL.md`. The member soul is its last section, because the
+  chair pastes it to the end of the file. `skills/overseer/SKILL.md` has its soul, tools and
   rules sections.
 - Entry points are skills under `skills/<name>/SKILL.md`, each with `name` equal to its
   directory, a `description`, and the child guard as the first line of its body. The plugin has

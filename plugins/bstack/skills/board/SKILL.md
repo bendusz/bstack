@@ -36,16 +36,17 @@ Arguments: $ARGUMENTS
   independent panel, not a discussion.
 
 ## Seats
-| Seat | Stake | Default target |
-|---|---|---|
-| sponsor | Accountable for the outcome: does the work still serve the goal, is the scope right, are the risks being retired, is it worth what it costs | `{"providerInstanceId":"claudeAgent","model":"claude-opus-5-5","options":{"effort":"high"}}` |
-| engineering | Owns what was built: correctness, tests, security, debt, and whether the next change will be cheap or dear | `{"providerInstanceId":"codex","model":"gpt-6.2-astra","options":{"reasoningEffort":"xhigh"}}` |
-| customer | The person who uses what ships: does it do what they need, would they get through the first run, the docs and the errors | `{"providerInstanceId":"claudeAgent","model":"claude-fable-5-2","options":{"effort":"medium"}}` |
-| operations | Runs it once it ships: release and rollback, configuration and secrets, what it depends on, how a failure shows and is recovered, and whether the handoff says enough | `{"providerInstanceId":"codex","model":"gpt-6.2-sol","options":{"reasoningEffort":"xhigh"}}` |
-| chair | None, and no vote | `{"providerInstanceId":"claudeAgent","model":"claude-opus-5-5","options":{"effort":"medium"}}` |
+| Seat | Default target |
+|---|---|
+| sponsor | `{"providerInstanceId":"claudeAgent","model":"claude-opus-5-5","options":{"effort":"high"}}` |
+| engineering | `{"providerInstanceId":"codex","model":"gpt-6.2-astra","options":{"reasoningEffort":"xhigh"}}` |
+| customer | `{"providerInstanceId":"claudeAgent","model":"claude-fable-5-2","options":{"effort":"medium"}}` |
+| operations | `{"providerInstanceId":"codex","model":"gpt-6.2-sol","options":{"reasoningEffort":"xhigh"}}` |
+| chair | `{"providerInstanceId":"claudeAgent","model":"claude-opus-5-5","options":{"effort":"medium"}}` |
 
-A seat is a place to look from, not a fence: every member judges the whole project. An override
-changes the model, never the stake. `quick` efforts: sponsor `medium`, engineering `high`,
+This table gives each seat its model. What a seat looks from, its stake, is in `souls.md`
+`## Stakes`, which the chair hands out. A seat is a place to look from, not a fence: every member
+judges the whole project. An override changes the model, never the stake. `quick` efforts: sponsor `medium`, engineering `high`,
 customer `low`, operations `high`; an effort the user names stands as given.
 
 ## Convene
@@ -69,7 +70,7 @@ customer `low`, operations `high`; an effort the user names stands as given.
      never enter your context; do not read `souls.md`.
      ```
      You are a bstack board chair child, not the PM and not a member. Do not invoke the PM skill or any other bstack skill.
-     Read ${CLAUDE_PLUGIN_ROOT}/skills/board/souls.md now, in full. Its "Chair soul" is your instructions; its "Member soul" is what you paste to each seat. Then hold this meeting. If you cannot read that file, return `Board: failed, cannot read souls.md` and stop.
+     Read ${CLAUDE_PLUGIN_ROOT}/skills/board/souls.md now, in full. Its "Chair soul" and "Holding the meeting" are your instructions; "Stakes" has each seat's stake; "Member soul" is what you paste to each seat. Then hold this meeting. If you cannot read that file, return `Board: failed, cannot read souls.md` and stop.
 
      Meeting
      - Stamp: <stamp> · Mode: <status | ask> · Rounds: <2 | 1 for quick>

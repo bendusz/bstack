@@ -140,6 +140,25 @@ the fallback and logs it.
 The PM runs on whatever model you choose; the plan records it as `PM model:`. A home repo's
 overseer starts each PM on `claude-fable-5-2` high (`claude-opus-5-5` high).
 
+### Where each soul is
+
+A soul is who an agent is and the rules it holds. A session has its own from the role skill that
+made it that role. A child has only what its dispatch carries.
+
+| Agent | Soul | How the agent gets it |
+|---|---|---|
+| PM | The body of [`pm/SKILL.md`](plugins/bstack/skills/pm/SKILL.md) | `/bstack:pm` loads it |
+| overseer | [`## Overseer soul`](plugins/bstack/skills/overseer/SKILL.md#overseer-soul), with the `## Rules` below it | `/bstack:overseer` loads it |
+| operator | [`## Operator soul`](plugins/bstack/skills/operator/SKILL.md#operator-soul) | `/bstack:operator` loads it |
+| builder | [`## builder`](plugins/bstack/skills/pm/references/roles.md#builder) | The PM puts it in the brief, after [`## Common`](plugins/bstack/skills/pm/references/roles.md#common) |
+| reviewer | [`## reviewer`](plugins/bstack/skills/pm/references/roles.md#reviewer). The design review, the retro's cross-story review and `/bstack:codex review` use it too | In the brief, after `## Common` |
+| verifier | [`## verifier`](plugins/bstack/skills/pm/references/roles.md#verifier) | In the brief, after `## Common` |
+| technical writer | [`## technical-writer`](plugins/bstack/skills/pm/references/roles.md#technical-writer) | In the brief, after `## Common` |
+| researcher | [`## researcher`](plugins/bstack/skills/pm/references/roles.md#researcher) | In the brief, after `## Common` |
+| spec-architect | [`## spec-architect`](plugins/bstack/skills/pm/references/roles.md#spec-architect) | In the brief, after `## Common` |
+| board chair | [`## Chair soul`](plugins/bstack/skills/board/souls.md#chair-soul), with [`## Holding the meeting`](plugins/bstack/skills/board/souls.md#holding-the-meeting) below it | The chair reads the file itself, from the path in its task |
+| board sponsor, engineering, customer, operations | One [`## Member soul`](plugins/bstack/skills/board/souls.md#member-soul) for all four, with the seat's name and its line of [`## Stakes`](plugins/bstack/skills/board/souls.md#stakes) filled in | The chair puts it in each seat's task |
+
 ## Skills
 
 Each is a skill: run it as `/bstack:<name>`, or describe the task and Claude picks it up. A role
