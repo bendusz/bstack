@@ -45,13 +45,23 @@ for t in $(grep -rhoE '[A-Za-z.-]+\.template' "$b/skills" | sort -u); do
   [ -f "$b/templates/$t" ] || { miss=1; bad "named but missing: templates/$t"; }
 done
 [ -f "$b/skills/board/souls.md" ] || { miss=1; bad "named but missing: skills/board/souls.md"; }
-for h in '## Chair soul' '## Member soul'; do
+for h in '## Chair soul' '## Holding the meeting' '## Stakes' '## Member soul'; do
   grep -qx "$h" "$b/skills/board/souls.md" 2>/dev/null || { miss=1; bad "souls.md lacks '$h'"; }
+done
+# The chair pastes the member soul to the end of the file, so no section may follow it.
+last=$(grep '^## ' "$b/skills/board/souls.md" 2>/dev/null | tail -1)
+[ "$last" = '## Member soul' ] || { miss=1; bad "souls.md ends with '$last', not '## Member soul'"; }
+# A seat is a target in the board's SKILL.md and a stake in souls.md: each seat has one of each.
+stakes=$(awk '$0=="## Stakes"{f=1;next} /^## /{f=0} f' "$b/skills/board/souls.md" 2>/dev/null)
+for s in sponsor engineering customer operations; do
+  n=$(printf '%s\n' "$stakes" | grep -c "^- $s: ")
+  [ "$n" -eq 1 ] || { miss=1; bad "souls.md '## Stakes' has $n lines for the $s seat, wanted 1"; }
+  grep -q "^| $s | \`{" "$b/skills/board/SKILL.md" || { miss=1; bad "board/SKILL.md has no target for the $s seat"; }
 done
 for h in '## Overseer soul' '## Tools' '## Rules'; do
   grep -qx "$h" "$b/skills/overseer/SKILL.md" 2>/dev/null || { miss=1; bad "overseer/SKILL.md lacks '$h'"; }
 done
-[ "$miss" -ne 0 ] || ok "every named reference, template and soul exists"
+[ "$miss" -ne 0 ] || ok "every named reference, template, soul and stake exists"
 
 # 3b. Token budgets. pm/SKILL.md loads every session; the phase references load only
 #     at their phase; a child's dispatch (## Common + its soul + the header skeleton) stays under

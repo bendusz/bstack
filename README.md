@@ -5,10 +5,14 @@ delivers the work through T3 child agents: builders write the code, a reviewer f
 family checks it, a verifier signs it off, a technical writer checks it against the plan's design,
 and the PM runs the gates and merges. It never writes implementation code itself.
 
-**Requirements.** T3 Code, with Codex available in T3. bstack dispatches every role through T3
-and stops if T3 is not there. The merge guard needs `jq`, `python3` or `node` to read its input,
-and refuses every story merge without one; the ops guard needs the same. The default workflow needs Codex for the opposite-family review,
-the design review and research. You may name other models for any dispatch. bstack leans on how T3 behaves
+**Requirements**
+- **T3 Code.** bstack dispatches every role through T3 and stops if T3 is not there.
+- **Codex, available in T3.** The default workflow needs it for the opposite-family review, the
+  design review and research. You may name other models for any dispatch.
+- **`jq`, `python3` or `node`.** The merge guard needs one of them to read its input and refuses
+  every story merge without one; the ops guard needs the same.
+
+bstack leans on how T3 behaves
 (where it puts a worktree, what a child's result carries, how a reused request key answers).
 Dispatch, messaging and the model ids were last checked against T3 Code 0.1.9 nightly on
 2026-11-10; the worktree behaviour on 2026-11-07; a child dispatching its own children, which the
@@ -91,12 +95,32 @@ own. Remove it with `/plugin marketplace remove deliver` (that also uninstalls t
 plugin), then run the two steps above. Projects keep working; see the 1.0.0 and 1.2.0 entries in
 [CHANGELOG.md](CHANGELOG.md) for what changes in a project.
 
+**Coming from 1.x?** 2.0.0 took two names away. `/bstack:home setup` is `/bstack:setup-home`,
+every other `/bstack:home <x>` is `/bstack:overseer <x>`, and the `project-manager` skill is
+`/bstack:pm`. A home repo needs one step: run `/bstack:overseer` there and say yes when it asks
+about the scheduled check. Until then the task runs a skill that no longer exists and no product
+is checked. Then run `/bstack:doctor` in the home repo. It reports the scheduled check as `OK`,
+and after the next run the first line of `docs/watch.md` carries a new time. The Upgrade list of
+the 2.0.0 entry in [CHANGELOG.md](CHANGELOG.md) has the rest.
+
 ## Use
 
 Describe the work ("act as my PM to build a CLI todo app") or run `/bstack:pm <request>`. On a
 project that is already signed off, `/bstack:pm` picks it up where it stands, and on a product
-that has shipped it starts a new plan for the request. To prepare a
-repository before anything is planned, run `/bstack:setup-project`.
+that has shipped it starts a new plan for the request.
+
+In a repository bstack has not worked in, start with these three, in order:
+
+1. `/bstack:setup-project` registers the folder with T3 and adds `AGENTS.md`, the `CLAUDE.md`
+   bridge and the secret scan.
+2. `/bstack:doctor` checks the T3 host, Codex, the toolchain and the gates before anything is
+   built.
+3. `/bstack:pm <request>` plans the request with you.
+
+The first two are optional. Without them the PM adds the same files after sign-off, and a
+missing tool or a failing gate shows up once the work has started.
+
+From the request, the work goes through six steps:
 
 1. **Plan.** The PM talks it through with you and writes `docs/plan.md`: scope, requirements and
    the low-level design (decisions, contracts, invariants, failure flows). When the project ends,
@@ -139,6 +163,25 @@ the fallback and logs it.
 
 The PM runs on whatever model you choose; the plan records it as `PM model:`. A home repo's
 overseer starts each PM on `claude-fable-5-2` high (`claude-opus-5-5` high).
+
+### Where each soul is
+
+A soul is who an agent is and the rules it holds. A session has its own from the role skill that
+made it that role. A child has only what its dispatch carries.
+
+| Agent | Soul | How the agent gets it |
+|---|---|---|
+| PM | The body of [`pm/SKILL.md`](plugins/bstack/skills/pm/SKILL.md) | `/bstack:pm` loads it |
+| overseer | [`## Overseer soul`](plugins/bstack/skills/overseer/SKILL.md#overseer-soul), with the `## Rules` below it | `/bstack:overseer` loads it |
+| operator | [`## Operator soul`](plugins/bstack/skills/operator/SKILL.md#operator-soul) | `/bstack:operator` loads it |
+| builder | [`## builder`](plugins/bstack/skills/pm/references/roles.md#builder) | The PM puts it in the brief, after [`## Common`](plugins/bstack/skills/pm/references/roles.md#common) |
+| reviewer | [`## reviewer`](plugins/bstack/skills/pm/references/roles.md#reviewer). The design review, the retro's cross-story review and `/bstack:codex review` use it too | In the brief, after `## Common` |
+| verifier | [`## verifier`](plugins/bstack/skills/pm/references/roles.md#verifier) | In the brief, after `## Common` |
+| technical writer | [`## technical-writer`](plugins/bstack/skills/pm/references/roles.md#technical-writer) | In the brief, after `## Common` |
+| researcher | [`## researcher`](plugins/bstack/skills/pm/references/roles.md#researcher) | In the brief, after `## Common` |
+| spec-architect | [`## spec-architect`](plugins/bstack/skills/pm/references/roles.md#spec-architect) | In the brief, after `## Common` |
+| board chair | [`## Chair soul`](plugins/bstack/skills/board/souls.md#chair-soul), with [`## Holding the meeting`](plugins/bstack/skills/board/souls.md#holding-the-meeting) below it | The chair reads the file itself, from the path in its task |
+| board sponsor, engineering, customer, operations | One [`## Member soul`](plugins/bstack/skills/board/souls.md#member-soul) for all four, with the seat's name and its line of [`## Stakes`](plugins/bstack/skills/board/souls.md#stakes) filled in | The chair puts it in each seat's task |
 
 ## Skills
 
