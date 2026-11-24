@@ -11,10 +11,13 @@ All notable changes to this project are documented here. Entries before 0.30.0 a
   `SKILL.md` table gives each seat its model alone. `check.sh` fails if a section follows the
   member soul, which the chair pastes to the end of the file, or if a seat lacks a stake or a
   model.
-- The README lists where each agent's soul is and how the agent gets it.
+- The README lists where each agent's soul is and how the agent gets it. It gives the
+  requirements as a list, opens `## Use` with the three commands for a repository bstack has
+  not worked in, and says what someone coming from 1.x has to do, with the check that a home
+  repo's scheduled check is running again.
 - The `rm -rf` line of 2.0.1 is in every brief the PM builds and in no board dispatch, which
   that entry's "every dispatch" did not say. The board's chair and members get no such line:
-  put in the same situation on Codex, they removed nothing without it.
+  put in the same situation on Codex three times each, they removed nothing without it.
 
 ## 2.0.1 - 2026-11-21
 

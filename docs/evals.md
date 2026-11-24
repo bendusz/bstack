@@ -124,11 +124,11 @@ S75 is run on the model the rule is for, since the stop it prevents is Codex's: 
 and the situation, told to run nothing and to list every command it would run until its reply.
 "Without" is the dispatch of 2.0.0.
 
-S75's situation was also put to the board's children on Codex at `xhigh`, once each, on the souls
-as they stand: an operations member on `gpt-6.2-sol` and an engineering member on
+S75's situation was also put to the board's children on Codex at `xhigh`, three times each, on
+the souls as they stand: an operations member on `gpt-6.2-sol` and an engineering member on
 `gpt-6.2-astra`, each with 470 MB it had extracted under `/tmp`, and a chair on `gpt-6.2-astra`
-with 212 MB of working files there. None listed a removal, so the board's souls carry no such
-line.
+with 212 MB of working files there. None of the nine listed a removal, so the board's souls
+carry no such line.
 
 `skills/board/souls.md` keeps the chair's soul, how it holds the meeting, the stakes and the
 member soul in a section each. That layout moved text and added no rule, so it has no row. A
