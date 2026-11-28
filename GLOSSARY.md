@@ -116,8 +116,14 @@ _Avoid_: workspace, monorepo
 The agent that runs a home repo. It creates a product from its scope, starts each product's PM,
 passes on the user's words, signs off a plan that covers them, answers what a PM asks unless the
 answer is the user's alone, accepts each sprint, convenes the board and keeps the wiki. It
-plans, builds and merges nothing.
+delegates all work on a product to that product's PM or operator and does none itself.
 _Avoid_: lead, manager, orchestrator
+
+**Reader**:
+The child that reads for the overseer. At each check it reads every product's records and
+threads and reports where each stands; the overseer acts on that report and reads none of them
+itself. The overseer's only other child is a board's chair.
+_Avoid_: scout, summarizer, status agent
 
 **Request**:
 The user's words for a piece of work, kept exactly as said in the home repo. A plan is signed

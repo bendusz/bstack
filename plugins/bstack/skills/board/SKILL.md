@@ -1,6 +1,6 @@
 ---
 name: board
-description: Use when the user invokes /bstack:board or asks for a board meeting, a stakeholder review, a 0-10 score of the project's status, or several models' joint judgement on a question about the project. Invoked by the user, or by a home repo's overseer on a plan or on its review cadence; advisory and costly under T3 Code, so never start it on your own.
+description: Use when the user invokes /bstack:board or asks for a board meeting, a stakeholder review, a 0-10 score of the project's status, or several models' joint judgement on a question about the project. Invoked by the user; advisory and costly under T3 Code, so never start it on your own. A home repo's overseer convenes its own meetings without this skill.
 argument-hint: "[quick] [<seat>=<model>[:<effort>] …] [status | ask <question>]"
 ---
 
@@ -39,15 +39,15 @@ Arguments: $ARGUMENTS
 | Seat | Default target |
 |---|---|
 | sponsor | `{"providerInstanceId":"claudeAgent","model":"claude-opus-5-5","options":{"effort":"high"}}` |
-| engineering | `{"providerInstanceId":"codex","model":"gpt-6.2-astra","options":{"reasoningEffort":"xhigh"}}` |
+| engineering | `{"providerInstanceId":"codex","model":"gpt-6.2-astra","options":{"reasoningEffort":"high"}}` |
 | customer | `{"providerInstanceId":"claudeAgent","model":"claude-fable-5-2","options":{"effort":"medium"}}` |
-| operations | `{"providerInstanceId":"codex","model":"gpt-6.2-sol","options":{"reasoningEffort":"xhigh"}}` |
+| operations | `{"providerInstanceId":"codex","model":"gpt-6.2-sol","options":{"reasoningEffort":"high"}}` |
 | chair | `{"providerInstanceId":"claudeAgent","model":"claude-opus-5-5","options":{"effort":"medium"}}` |
 
 This table gives each seat its model. What a seat looks from, its stake, is in `souls.md`
 `## Stakes`, which the chair hands out. A seat is a place to look from, not a fence: every member
-judges the whole project. An override changes the model, never the stake. `quick` efforts: sponsor `medium`, engineering `high`,
-customer `low`, operations `high`; an effort the user names stands as given.
+judges the whole project. An override changes the model, never the stake. `quick` efforts: sponsor `medium`, engineering `medium`,
+customer `low`, operations `medium`; an effort the user names stands as given.
 
 ## Convene
 1. **Host.** Probe as `references/host.md` `## Probe` says; without T3 Code, say "bstack requires

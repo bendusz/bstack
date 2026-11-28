@@ -15,7 +15,10 @@ scripts and two hooks.
   - Role skills make the session a role and hold its soul in their body. `pm` is the project
     manager, with ten `references/` (planning, scaffold, loop, roles, host, state, retro,
     skeleton, and acceptance and release, loaded only at their phase). `overseer` runs a home
-    repo over several product repositories. `operator` runs and uses a product that is built,
+    repo over several product repositories; `skills/overseer/reader.md` holds the soul, the
+    reading and the report of the reader, the child that reads the products for it, and
+    `skills/overseer/board.md` how it convenes and closes a board meeting by dispatching the
+    chair. `operator` runs and uses a product that is built,
     inside the charter under its `docs/ops/`.
   - Setup skills prepare a folder and take on no role: `setup-project`, `setup-home` and
     `setup-ops`.
@@ -55,12 +58,14 @@ scripts and two hooks.
   `skills/board/souls.md` with its two souls, the chair's procedure and one stake for each seat
   that has a target in the board's `SKILL.md`. The member soul is its last section, because the
   chair pastes it to the end of the file. `skills/overseer/SKILL.md` has its soul, tools and
-  rules sections.
+  rules sections, `skills/overseer/reader.md` its soul, reading and report sections, and
+  `skills/overseer/board.md` its convene and close sections.
 - Entry points are skills under `skills/<name>/SKILL.md`, each with `name` equal to its
   directory, a `description`, and the child guard as the first line of its body. The plugin has
   no `commands` directory.
 - `${CLAUDE_PLUGIN_ROOT}` appears only in a `SKILL.md` body and `hooks/hooks.json`, where Claude
-  Code substitutes it. References and templates write `<plugin>`, which every skill defines.
+  Code substitutes it. References and templates write `<plugin>`, which every skill defines, and so does
+  `overseer/board.md`; `souls.md` and `reader.md` name no plugin path.
 - Every model id in the plugin and the README is in `check.sh`'s pinned list: full ids such as
   `claude-opus-5-5`, never a moving alias.
 - The six scripts in `plugins/bstack/scripts/` are the only code in the plugin, each executable

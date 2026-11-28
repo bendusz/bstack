@@ -10,9 +10,9 @@ a dispatch fails on it twice), use its fallback and log it. Record the model use
 |---|---|---|---|
 | PM | the plan's `PM model:`, the user's choice | none | No child takes it. An overseer starts one on the model `skills/overseer/SKILL.md` rule 1 names. |
 | builder: builds, fixes, tests only | `claude-opus-5-5` high | `gpt-6.2-astra` high | One default, whatever the story's size. |
-| design review | `gpt-6.2-astra` xhigh | `claude-opus-5-5` high | Reviewer soul, `focus: plan`, before a `Design review: yes` build. Rulings go into the story's Context. |
-| reviewer | the family that did not build: `gpt-6.2-astra` xhigh after Claude, `claude-opus-5-5` high after Astra | none: wait or escalate | A builder on its fallback flips the reviewer. |
-| verifier | `claude-opus-5-5` high | `gpt-6.2-sol` xhigh | Also the sprint journey gate and the release candidate. |
+| design review | `gpt-6.2-astra` high | `claude-opus-5-5` high | Reviewer soul, `focus: plan`, before a `Design review: yes` build. Rulings go into the story's Context. |
+| reviewer | the family that did not build: `gpt-6.2-astra` high after Claude, `claude-opus-5-5` high after Astra | none: wait or escalate | A builder on its fallback flips the reviewer. |
+| verifier | `claude-opus-5-5` high | `gpt-6.2-sol` high | Also the sprint journey gate and the release candidate. |
 | technical writer | `claude-sonnet-5-5` high | `claude-opus-5-5` medium | Before every merge (`loop.md` step 8), and the cold read (`acceptance.md` `## 4`). |
 | spec-architect | `claude-opus-5-5` high | `gpt-6.2-astra` high | |
 | researcher | `gpt-6.2-sol` high | `claude-opus-5-5` high | |
