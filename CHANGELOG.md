@@ -3,6 +3,64 @@
 All notable changes to this project are documented here. Entries before 0.30.0 are in git
 (tag `v0.29.4`).
 
+## 2.1.0 - 2026-11-28
+
+A day of running an overseer over four products showed where it went wrong, and these are the
+fixes: it did product work itself, read every thread into its own context, raised the bar past
+what was asked, asked the same question twice and buried the user in lists.
+
+**The overseer delegates**
+- All work on a product goes to its PM or its operator. Rule 1 says what work is: whatever
+  changes, runs or examines a product, a one-line fix and a look at why something is slow
+  included. Before, the tools list gave the overseer `delegate_task` for "your own side work",
+  and asked to look into a slow test suite it started a child of its own in the product and
+  told no PM. Its only children now are the reader and a board's chair.
+- The overseer no longer reads where the products stand. Each check dispatches one reader, a
+  child on `claude-sonnet-5-5` at high, which reads every product's records and its PM and
+  operator threads and returns a block for each: the head of the checkout, the gate, the
+  stories, every unanswered question quoted in full, and what the user wrote in a PM's thread
+  themselves. The overseer acts on that report and has no `t3_thread_read`. The reader's soul
+  and its report format are in `skills/overseer/reader.md`, which the reader reads from the
+  path in its task. A reader that fails gets one replacement; after a second failure the check
+  writes its time, lists `reader failed` under `Needs you` and ends. The plan and the retro the
+  overseer signs off or accepts are still its own to read.
+- The overseer convenes a board by dispatching the chair itself, as a delegated task from the
+  home repo's thread; it launches no `board <repo>` thread and runs no `/bstack:board`. The
+  chair and its seats reach the product by its absolute path. The watch line holds the chair's
+  task id, so the turn its completion wakes, or the next check, closes the meeting. The PM
+  commits the minutes with the chair's log line. How a meeting is convened and closed moved
+  from rule 8 to `skills/overseer/board.md`, read when one is due or returns.
+
+**The overseer adds nothing**
+- It adds no requirement, standard, gate or rule the user did not ask for, and a word of
+  quality in a request ("the highest standard") decides no question. Where the request, the
+  wiki and the plan do not decide one, the PM's own default stands. Before, rule 6 took "the
+  option closest to the request", which read "the highest standard" as the strictest answer
+  to every question.
+- An option that would be the user's alone (money, scope, a date) is put to the user only when
+  someone asks for it. A PM that merely offers one, with a default that takes none, has its
+  answer in that default.
+
+**What reaches the user**
+- A question is asked once. The user's answer is kept under `## Answered by the user` in the
+  request file, and one that covers every product in the wiki. When a PM asks again, in any
+  wording, it gets the user's words. Before, no file held the answer, so a new PM thread's
+  question went to the user a second time.
+- Each `Needs you` line has a name of its own (`RELEASE-DATE`) that it keeps until it is
+  answered, and nothing shown to the user is numbered: numbers changed from one message to the
+  next, and answers landed on the wrong question.
+- A check shows only what is new at it and says how many earlier asks still wait. `Decided for
+  you` keeps its newest 20 lines.
+
+**Models**
+- Every Codex default is at `high` effort. The design review, the reviewer, the verifier's
+  fallback, `/bstack:codex review` and the board's engineering and operations seats were at
+  `xhigh`. `quick` lowers those two seats to `medium`.
+
+**Checks**
+- `check.sh` fails if `reader.md` or the overseer's `board.md` is missing, lacks a section or
+  is not named by the overseer's skill.
+
 ## 2.0.2 - 2026-11-24
 
 - The board's `souls.md` has a section for each part of a seat: the chair's soul, how it holds

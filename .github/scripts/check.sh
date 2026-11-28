@@ -61,6 +61,18 @@ done
 for h in '## Overseer soul' '## Tools' '## Rules'; do
   grep -qx "$h" "$b/skills/overseer/SKILL.md" 2>/dev/null || { miss=1; bad "overseer/SKILL.md lacks '$h'"; }
 done
+# The overseer's check names reader.md in the reader's task; the reader reads it from there.
+[ -f "$b/skills/overseer/reader.md" ] || { miss=1; bad "named but missing: skills/overseer/reader.md"; }
+for h in '## Reader soul' '## Reading' '## Report'; do
+  grep -qx "$h" "$b/skills/overseer/reader.md" 2>/dev/null || { miss=1; bad "reader.md lacks '$h'"; }
+done
+grep -q 'skills/overseer/reader\.md' "$b/skills/overseer/SKILL.md" || { miss=1; bad "overseer/SKILL.md never names reader.md"; }
+# Its rule 8 names board.md, which holds how the overseer convenes and closes a meeting.
+[ -f "$b/skills/overseer/board.md" ] || { miss=1; bad "named but missing: skills/overseer/board.md"; }
+for h in '## Convene' '## Close'; do
+  grep -qx "$h" "$b/skills/overseer/board.md" 2>/dev/null || { miss=1; bad "overseer/board.md lacks '$h'"; }
+done
+grep -q 'skills/overseer/board\.md' "$b/skills/overseer/SKILL.md" || { miss=1; bad "overseer/SKILL.md never names board.md"; }
 [ "$miss" -ne 0 ] || ok "every named reference, template, soul and stake exists"
 
 # 3b. Token budgets. pm/SKILL.md loads every session; the phase references load only
@@ -89,7 +101,7 @@ for pair in builder:2005:PRIOR reviewer:2035:PRIOR verifier:1744:PRIOR \
 done
 
 # 4. ${CLAUDE_PLUGIN_ROOT} is substituted only in a SKILL.md body and hooks.json: references say <plugin>.
-if grep -rn 'CLAUDE_PLUGIN_ROOT' "$refs" "$b/templates" "$b/skills/board/souls.md"; then
+if grep -rn 'CLAUDE_PLUGIN_ROOT' "$refs" "$b/templates" "$b/skills/board/souls.md" "$b/skills/overseer/reader.md" "$b/skills/overseer/board.md"; then
   bad "a reference or template uses \${CLAUDE_PLUGIN_ROOT}; write <plugin> there"
 else ok "no \${CLAUDE_PLUGIN_ROOT} outside a SKILL.md body"; fi
 for f in "$b"/skills/*/SKILL.md; do

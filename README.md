@@ -154,15 +154,16 @@ the fallback and logs it.
 | Role | Does | Default (fallback) |
 |---|---|---|
 | builder | Implements one story, a tests-only brief or a fix, in its own worktree | `claude-opus-5-5` high (Codex `gpt-6.2-astra` high) |
-| design review | Reviews the plan of a storage, data-model, migration or versioning story before it is built | Codex `gpt-6.2-astra` xhigh (`claude-opus-5-5` high) |
-| reviewer | Reviews the diff against the story; never the builder | The family that did not build: Codex `gpt-6.2-astra` xhigh after a Claude build, `claude-opus-5-5` high after an Astra build |
-| verifier | Checks each acceptance criterion, the sprint's journeys and the release candidate | `claude-opus-5-5` high (Codex `gpt-6.2-sol` xhigh) |
+| design review | Reviews the plan of a storage, data-model, migration or versioning story before it is built | Codex `gpt-6.2-astra` high (`claude-opus-5-5` high) |
+| reviewer | Reviews the diff against the story; never the builder | The family that did not build: Codex `gpt-6.2-astra` high after a Claude build, `claude-opus-5-5` high after an Astra build |
+| verifier | Checks each acceptance criterion, the sprint's journeys and the release candidate | `claude-opus-5-5` high (Codex `gpt-6.2-sol` high) |
 | technical writer | Reads each story's diff against the plan's Design before the merge, and reads the shipped plan cold for what a rebuild would have to guess | `claude-sonnet-5-5` high (`claude-opus-5-5` medium) |
 | researcher | Answers one external question, and checks every plan of more than one story for parts a library already provides; report under `docs/research/` | Codex `gpt-6.2-sol` high (`claude-opus-5-5` high) |
 | spec-architect (optional) | Writes the SpecDD `.sdd` files for a sprint | `claude-opus-5-5` high (Codex `gpt-6.2-astra` high) |
 
 The PM runs on whatever model you choose; the plan records it as `PM model:`. A home repo's
-overseer starts each PM on `claude-fable-5-2` high (`claude-opus-5-5` high).
+overseer starts each PM on `claude-fable-5-2` high (`claude-opus-5-5` high), and its reader on
+`claude-sonnet-5-5` high. Every Codex default is at high effort.
 
 ### Where each soul is
 
@@ -173,6 +174,7 @@ made it that role. A child has only what its dispatch carries.
 |---|---|---|
 | PM | The body of [`pm/SKILL.md`](plugins/bstack/skills/pm/SKILL.md) | `/bstack:pm` loads it |
 | overseer | [`## Overseer soul`](plugins/bstack/skills/overseer/SKILL.md#overseer-soul), with the `## Rules` below it | `/bstack:overseer` loads it |
+| reader | [`## Reader soul`](plugins/bstack/skills/overseer/reader.md#reader-soul), with `## Reading` and `## Report` below it | The reader reads the file itself, from the path in its task |
 | operator | [`## Operator soul`](plugins/bstack/skills/operator/SKILL.md#operator-soul) | `/bstack:operator` loads it |
 | builder | [`## builder`](plugins/bstack/skills/pm/references/roles.md#builder) | The PM puts it in the brief, after [`## Common`](plugins/bstack/skills/pm/references/roles.md#common) |
 | reviewer | [`## reviewer`](plugins/bstack/skills/pm/references/roles.md#reviewer). The design review, the retro's cross-story review and `/bstack:codex review` use it too | In the brief, after `## Common` |
@@ -206,8 +208,8 @@ skill makes the session that role. A setup skill prepares a folder and takes on 
 ## The board
 
 `/bstack:board` seats four stakeholders, each a T3 child on its own model: a **sponsor**
-(`claude-opus-5-5`, high), an **engineering** lead (Codex `gpt-6.2-astra`, xhigh), a **customer**
-(`claude-fable-5-2`, medium) and an **operations** lead (Codex `gpt-6.2-sol`, xhigh), who runs
+(`claude-opus-5-5`, high), an **engineering** lead (Codex `gpt-6.2-astra`, high), a **customer**
+(`claude-fable-5-2`, medium) and an **operations** lead (Codex `gpt-6.2-sol`, high), who runs
 what ships. With no arguments they score how well placed the project is to reach
 its next milestone, from 0 to 10, and recommend what to do; `/bstack:board ask <question>` puts a
 question to them instead.
@@ -233,7 +235,8 @@ go to `docs/board/` in a project the PM manages, and to `tmp/board/` anywhere el
 and `/bstack:overseer` makes Claude its overseer. The home repo delivers nothing: it has no plan, approval record or
 stories. Each product keeps its own PM, in its own T3 project and thread, with its own gates and
 merge guard. The overseer answers for you wherever the answer is not yours alone, so a product
-you are not watching keeps moving.
+you are not watching keeps moving. It delegates: whatever is done inside a product, a fix of one
+line and a look at why something is slow included, goes to that product's PM or operator.
 
 - **Setup** registers each nested repository as a T3 project, asking first, and writes an
   `AGENTS.md` with one pointer per repository, a wiki index and a `.gitignore` for the nested
@@ -251,27 +254,38 @@ you are not watching keeps moving.
   than one sprint it convenes the board.
 - **Answers.** A PM's question goes to the overseer. It quotes your request or the wiki when
   they answer it. Otherwise it reads the product's plan, decides how a requirement you stated
-  is met, tells the PM and records the decision in the request file. A preference you state
+  is met, tells the PM and records the decision in the request file. It adds no requirement,
+  standard or gate of its own, and "the highest standard" in a request is not one: where
+  nothing you said decides a question, the PM's own default stands. A preference you state
   that covers every product goes into the wiki as a standard. It accepts each sprint's demo and starts the next
   sprint in a new PM thread.
 - **Yours alone.** A scope or date change, a waiver, a push, a secret, money, the release
   walk-through, a go/no-go and anything that cannot be undone. So is a change of direction: a
   board recommendation that changes the scope, the architecture or the plan, or any change that
   replaces what merged stories built, whoever proposes it. Each waits for you in the PM's or the
-  chair's words, and the PM carries on with the plan as signed off. A PM's own escalation
+  chair's words, under a name of its own that you answer by, and the PM carries on with the
+  plan as signed off. You are asked once: your answer is kept in the request file, and a PM
+  that asks again gets your words. An option a PM only offers, with a default that takes none
+  of these, is not put to you. A PM's own escalation
   names a default and a time. If you have not answered by then, that default applies, and it
   leaves the scope and the date as signed off: changing either takes your own words.
 - **The board.** While a product builds, the overseer convenes a status meeting 4 hours after
   sign-off and every 8 hours after that, and only when a story has merged since the last one.
-  Setup asks for other hours, or never. The PM holds merges while the board reads the tree, for
-  at most two hours; a meeting that fails releases the hold. The verdict goes to the PM. The
-  overseer may tell the PM to adopt a recommendation that stays inside the plan.
-- **Check-ups.** A scheduled check, every 20 minutes unless you choose otherwise, reads each
-  product's gate, stories and PM thread, and acts on what changed. It keeps `docs/watch.md`:
+  Setup asks for other hours, or never. The overseer dispatches the chair itself, as a
+  delegated task from the home repo's thread, and starts no board thread. The PM holds merges
+  while the board reads the tree, for at most two hours; a meeting that fails releases the
+  hold. The verdict goes to the PM, which commits the minutes. The overseer tells the PM to
+  adopt a recommendation that stays inside the plan.
+- **Check-ups.** A scheduled check, every 20 minutes unless you choose otherwise, acts on what
+  changed in each product. The overseer reads none of it itself: a reader child reads each
+  product's gate, stories and threads and reports where it stands, with every question quoted
+  in full. If the reader fails twice, the check says so under what needs you. A check shows
+  you only what is new at it, numbers nothing, and keeps the newest 20 decisions. It keeps
+  `docs/watch.md`:
   what needs you, what was decided for you and one line per product. `/bstack:overseer seen`
   clears the decided list once you have read it. Its first line is the time of the last check.
-- **What it costs.** Each check is a fresh session that reads every product: 72 a day at 20
-  minutes, whether or not anything changed. A board meeting is nine runs, eight member runs and
+- **What it costs.** Each check is a fresh session and one reader run that reads every
+  product: 72 of each a day at 20 minutes, whether or not anything changed. A board meeting is nine runs, eight member runs and
   a chair, and at the default hours a product that is building gets at most three a day.
 - **Is it still watching?** `/bstack:doctor` in the home repo says whether the scheduled check
   is there, enabled and on time, and whether each product is still a repository and a T3

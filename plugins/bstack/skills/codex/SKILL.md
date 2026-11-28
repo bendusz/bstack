@@ -27,7 +27,7 @@ Arguments: $ARGUMENTS
   - `codebase`: the whole tracked tree, no diff.
 - **Objectives**: every remaining word or quoted phrase, such as `security`, `performance`,
   `design` or `"error handling in the parser"`. None means one general review.
-- **Model**: Codex `gpt-6.2-astra`, `reasoningEffort: xhigh`, the reviewer default for Claude's work.
+- **Model**: Codex `gpt-6.2-astra`, `reasoningEffort: high`, the reviewer default for Claude's work.
   Use another only when the user names one (`model=<id>`, `effort=<level>`) and
   `orchestrator_capabilities` lists it. A Codex target always sets `reasoningEffort`.
 
@@ -39,7 +39,7 @@ message so they run in parallel:
   `design`, `security` or `performance`, else `Objective: <text>`. When the review targets a
   story, add its story file (with its acceptance criteria) and its recorded `pm-exec.worktree`,
   and run the diff there. With no story, add: "No story: CRITERIA is n/a."
-- `target`: `{"providerInstanceId":"codex","model":"gpt-6.2-astra","options":{"reasoningEffort":"xhigh"}}`.
+- `target`: `{"providerInstanceId":"codex","model":"gpt-6.2-astra","options":{"reasoningEffort":"high"}}`.
 - `isolation: "shared"`, so the child sees the checkout as it is, uncommitted changes included.
 - `title`: `codex review <scope> <objective>`.
 - `clientRequestId`: `codex-review-<stamp>`, fresh per call; with several objectives, append
